@@ -9,7 +9,7 @@
 
 ## Team Members
 - Leon Tjandra
-- Jerome heng Hao Xiang
-- Leong Yun Qin Melody (1004489)
+- Jerome Heng Hao Xiang
+- Leong Yun Qin Melody
 
 
