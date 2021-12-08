@@ -13,6 +13,22 @@ def read_data(path):
 
 # e(x|y) = Count(y -> x)/Count(y)
 
+# FOR TRANSMISSION EDITED
+def read_data_transmission(path):
+  dataset = []
+  f = open(path,"r", encoding="utf-8")
+  training_set = f.readlines()
+  for line in training_set:
+    # if to include \n
+    if len(line) == 1:
+      dataset.append("\n")
+    else:
+      content_line = line.split() #split into the "text" and the "tag/label" using line.split()
+      dataset.append(content_line) #append to the ES dataset
+  #Remove empty lists within list
+  Edataset = [ele for ele in dataset]
+  return Edataset
+
 # Count(y)
 # Output: dictionary of form {'label', 'count of this label in the dataset'}
 def count_tags(training_set):

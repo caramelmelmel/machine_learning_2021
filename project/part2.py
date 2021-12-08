@@ -10,9 +10,13 @@ def count_transmissions(data):
         transmissions[label] = {'O':0,'B-positive':0,'B-neutral':0,'B-negative':0,'I-positive':0,'I-neutral':0,'I-negative':0, 'STOP':0}
     last_position = 'START'
     for line in data:
-        transmissions[last_position][line[1]] += 1
-        last_position = line[1]
-    transmissions[last_position]['STOP'] += 1
+        if line =="\n": #if line is a slash n - need to concern, rewrite processing script to include \n
+            transmissions[last_position]["STOP"] += 1 #add transmission from last read label to STOP state
+            last_position = 'START' #reset state back to start
+        else:
+            transmissions[last_position][line[1]] += 1 #for transmission from the Label/State at LAST POSITION to the state read from the line
+            last_position = line[1] #move/transit to the next state read from the line
+    #transmissions[last_position]['STOP'] += 1 #add +1 for each transmission from label/state read to STOP
     return transmissions
 
 # Outputs a dictionary {'label1': {'label1': probability of label1->label1, 'label2': probability of label1->label2...}...}
@@ -24,9 +28,12 @@ def estimate_transmission_parameters(transmission_count, tags_count):
         if label_in != 'START':
             for label_out, count in t_counts.items():
                 transmission_prob[label_in][label_out] = count/tags_count[label_in]
+    """
+    #Special Cases
     for first_label, start_count in transmission_count['START'].items():
         if start_count > 0:
             transmission_prob['START'][first_label] = 1
+    """
     return transmission_prob
 
 def estimate_emission_parameters_with_unk(count_tags, count_tag_words,k=1):
@@ -139,7 +146,7 @@ def viterbi(data, t_params, e_params):
 
 ## Actual running code
 #Outputs list (size n) of list (size 2) in this form: ['word', 'label']
-es_train = utilities.read_data(r"ES\train")
+es_train = utilities.read_data_transmission(r"ES\train")
 tags = utilities.count_tags(es_train)
 tag_words = utilities.count_tag_words(es_train)
 transmission_counts = count_transmissions(es_train)
