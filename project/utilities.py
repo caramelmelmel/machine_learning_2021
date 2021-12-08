@@ -1,3 +1,4 @@
+import os
 #Outputs list (size n) of list (size 2) in this form: ['word', 'label']
 def read_data(path):
   dataset = []
@@ -48,3 +49,7 @@ def estimate_transmission_parameters(count_tags, count_tag_words):
       single_tag_estimation[word_count[0]] = estimated_value
     all_estimations[unique_tag_tuple[0]] = single_tag_estimation
   return all_estimations
+
+#pass in the file name as the string
+def read_universal(file_name):
+  return os.getcwd() + file_name
