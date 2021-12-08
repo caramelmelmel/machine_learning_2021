@@ -21,13 +21,12 @@ def count_transmissions(data):
 
 # Outputs a dictionary {'label1': {'label1': probability of label1->label1, 'label2': probability of label1->label2...}...}
 def estimate_transmission_parameters(transmission_count, tags_count):
-    transmission_prob = {'START':{}, 'O':{},'B-positive':{},'B-neutral':{},'B-negative':{},'I-positive':{},'I-neutral':{},'I-negative':{}}
+    transmission_prob = {'START':{}, 'O':{},'B-positive':{},'B-neutral':{},'B-negative':{},'I-positive':{},'I-neutral':{},'I-negative':{},'STOP':{}}
     for label in transmission_prob.keys():
-        transmission_prob[label] = {'O':0,'B-positive':0,'B-neutral':0,'B-negative':0,'I-positive':0,'I-neutral':0,'I-negative':0, 'STOP':0}
+        transmission_prob[label] = {'START':0,'O':0,'B-positive':0,'B-neutral':0,'B-negative':0,'I-positive':0,'I-neutral':0,'I-negative':0, 'STOP':0}
     for label_in, t_counts in transmission_count.items():
-        if label_in != 'START':
-            for label_out, count in t_counts.items():
-                transmission_prob[label_in][label_out] = count/tags_count[label_in]
+        for label_out, count in t_counts.items():
+            transmission_prob[label_in][label_out] = count/tags_count[label_in]
     """
     #Special Cases
     for first_label, start_count in transmission_count['START'].items():
@@ -147,7 +146,7 @@ def viterbi(data, t_params, e_params):
 ## Actual running code
 #Outputs list (size n) of list (size 2) in this form: ['word', 'label']
 es_train = utilities.read_data_transmission(r"ES\train")
-tags = utilities.count_tags(es_train)
+tags = utilities.count_tags_transmission(es_train)
 tag_words = utilities.count_tag_words(es_train)
 transmission_counts = count_transmissions(es_train)
 t_params = estimate_transmission_parameters(transmission_counts, tags)
