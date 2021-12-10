@@ -100,9 +100,10 @@ def smooth_labels(transmission_parameters):
     alpha_sm = 0.1 #hyperparameter for label smoothing, default 0.1
     for entry in smoothed_dict: #for each dictionary
         for label in smoothed_dict[entry]: #for each label in each dictionary
-            if label != 'START' and label != 'STOP':
+            if label != 'START':
                 smoothed_dict[entry][label] *= (1 - alpha_sm)
-                smoothed_dict[entry][label] += (alpha_sm/(len(smoothed_dict[entry])-2)) #add by the smoothing factor/number of labels without START/STOP
+                smoothed_dict[entry][label] += (alpha_sm/(len(smoothed_dict[entry])-1)) #add by the smoothing factor/number of labels without START
+            # there is no transition to START at all
     return smoothed_dict #return smoothed dictionary
 
 print(smooth_labels(t_params))
