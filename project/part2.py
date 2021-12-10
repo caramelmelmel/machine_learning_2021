@@ -1,5 +1,6 @@
 import utilities
 import math
+import sys
 
 ## This is code to obtain the transmission parameters
 
@@ -59,8 +60,10 @@ def estimate_emission_parameters_with_unk(count_tags, count_tag_words,k=1):
 # Viterbi algorithm
 # a(u,v) is t_params
 # b(u,o) is e_params
+
 def viterbi(data, t_params, e_params):
     n = len(data)
+    # Includes only possible labels for the words in our dataset: ie. excludes 'START' and 'STP{}
     labels = ['O', 'B-positive', 'B-neutral', 'B-negative', 'I-positive', 'I-neutral', 'I-negative']
 
     # Initialization.
@@ -87,49 +90,60 @@ def viterbi(data, t_params, e_params):
             cache[1][label][0] = 1
             cache[1][label][1] = 'START'
             break
-    print(cache)
 
     # 0th value of the cache is the START token, but the 0th value of the dataset is the 1st word.
     # the START token is not part of the dataset - so we iterate until n+1.
+    # ie. from 1 to n instead of 0 to n-1.
     for j in range(1, n):
         next_word = data[j][0]
+        # Iterate over all of the current labels in this step.
         for u in labels:
-            maximum = -999
+            maximum = -sys.float_info.max
             max_label = ''
+            # Because we want to find the maximum v
             for v in labels:
+                # print("transmission from", v, "to", u)
                 # If any of the observed probabilities are 0, we should skip because that is an impossible path
-                if (cache[j][u][0] == 0) or (t_params[v][u] == 0):
+                if (cache[j][v][0] == 0 or t_params[v][u] == 0):
+                    # print(v, "to", u, "is impossible")
                     continue
-                
+                prev_cached_value = cache[j][v][0]
                 # print('now logging cache', cache[j][u][0], t_params[v][u])
-                prev_cached_value = cache[j][u][0]
                 if next_word not in e_params[u].keys():
+                    # print("the next word is not in our dictionary. using the #UNK# probability")
                     emission_prob = math.log(e_params[u]['#UNK#'])
                 else:
+                    # print("word in our dictionary")
                     emission_prob = math.log(e_params[u][next_word])
                 transmission_prob = math.log(t_params[v][u])
                 prob = prev_cached_value + emission_prob + transmission_prob
-                # print(u, 'to', v, 'word:', next_word, 'has prob', prob)
+                # print(v, 'to', u, 'word:', next_word, 'has prob', prob)
                 if maximum < prob:
                     maximum = prob
-                    max_label = u
-
-            cache[j+1][u][0] = maximum
+                    max_label = v
+                
+            cache[j+1][u][0] = math.exp(maximum)
             cache[j+1][u][1] = max_label
     
-    # Final Step
-    maximum = 0
+    # Final Step (n+1)
+    maximum = -sys.float_info.max
     max_label = ''
-    print(cache)
     for v in labels:
-        prev_cached_value = cache[n][u][0]
+        prev_cached_value = cache[n][v][0]
         transmission_prob = t_params[v]['STOP']
-        prob = prev_cached_value * transmission_prob
+        if (prev_cached_value == 0 or transmission_prob == 0):
+            continue
+        prob = math.log(prev_cached_value) + math.log(transmission_prob)
         if maximum < prob:
             maximum = prob
-            max_label = u
-    cache[n+1]['STOP'][0] = maximum
+            max_label = v
+
+    cache[n+1]['STOP'][0] = math.exp(maximum)
     cache[n+1]['STOP'][1] = max_label
+
+    print("n-1:", cache[n-1])
+    print("n", cache[n])
+    print("n+1", cache[n+1])
     
     # Finding the most probable labels.
     output = ['' for i in range(n)]
