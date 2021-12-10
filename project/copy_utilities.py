@@ -15,12 +15,7 @@ def read_data(path):
     del line[1]
     if line != ['', '']:
       dataset.append(line)
-
-  #Edataset = [ele for ele in dataset if ele != []]
-  #dataset = [ele for ele in Edataset if ele !=['']]
   return dataset
-
-
 
 # e(x|y) = Count(y -> x)/Count(y)
 # Count(y)
