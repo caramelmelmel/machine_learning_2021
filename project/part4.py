@@ -1,7 +1,6 @@
 #Improved sentiment analysis model
 import utilities
 import string
-import sys
 
 # Generate a list of stopwords
 # Use lemmization
@@ -76,6 +75,38 @@ print(get_symbols(modif_RU))
 #print(tags_ru)
 #print(stopwordsRU)
 # Label Smoothing
+# Smooth Transmission Parameters
+# Instead of using hard probabilities, reduce a bit by a small probability which is 1/all the possible transmission
+# Allocate that same amount for the rest of the possible transmission
+# Instead of using hard labels, use soft labels, increase the probability of the incorrect classes by a very small amount, decrease the probability of the correct class by that very small amount
+# Multi-class classification problem
+# For each Label theres a dictionary which shows the next state, input is this dictionary, some way to format into a list of probabilities
+# so multiply everything by 1 - smoothing factor, add everything by smoothing/divided by the number of labels
+# Smooth the very high probability
+# Apply for emission as well - a bit more even out?????
+# how to determine the smoothing factor, test different values = 0.1, 0.05, 0.01, Hyperparameters, hyperparameter tuning applying what we learn in ML
+# Idea of smoothing
+"""
+def smooth_labels(labels, factor=0.1):
+	# smooth the labels
+	labels *= (1 - factor)
+	labels += (factor / labels.shape[1])
+	# returned the smoothed labels
+	return labels
+"""
+#may need to modify for PART IV, also different cases for start/stop possibly
+def smooth_labels(transmission_parameters):
+    smoothed_dict = transmission_parameters
+    alpha_sm = 0.1 #hyperparameter for label smoothing, default 0.1
+    for entry in smoothed_dict: #for each dictionary
+        for label in smoothed_dict[entry]: #for each label in each dictionary
+            if label != 'START' and label != 'STOP':
+                smoothed_dict[entry][label] *= (1 - alpha_sm)
+                smoothed_dict[entry][label] += (alpha_sm/(len(smoothed_dict[entry])-2)) #add by the smoothing factor/number of labels without START/STOP
+    return smoothed_dict #return smoothed dictionary
+
+print(smooth_labels(t_params))
+
 
 """
 # https://github.com/ongkahyuan/ML-project/blob/main/part5.py
