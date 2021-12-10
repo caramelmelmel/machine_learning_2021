@@ -2,23 +2,25 @@ import os
 
 #Outputs list (size n) of list (size 2) in this form: ['word', 'label']
 #label_list = ["B-positive","I-positive",""]
-#SOLVED
+#returns [word,label] as nested list
 def read_data(path):
   dataset = []
   f = open(path,"r", encoding="utf-8")
   training_set = f.readlines()
   for line in training_set:
     #loop backwards
-    line = line.splitlines()
-    line = line[0].split(" ") #split into the "text" and the "tag/label" using line.split()
-    if len(line) > 2:
-      word_list_tag = [" ".join(item for item in line[0:len(line)-1]),line[len(line)-1]]
-      dataset.append(word_list_tag)
-    else:
+    line = line.rstrip('\n')
+    line = line.rpartition(' ')
+    line = list(line)
+    del line[1]
+    if line != ['', '']:
       dataset.append(line)
-  Edataset = [ele for ele in dataset if ele != []]
-  dataset = [ele for ele in Edataset if ele !=['']]
+
+  #Edataset = [ele for ele in dataset if ele != []]
+  #dataset = [ele for ele in Edataset if ele !=['']]
   return dataset
+
+
 
 # e(x|y) = Count(y -> x)/Count(y)
 # Count(y)
@@ -61,3 +63,5 @@ def estimate_transmission_parameters(count_tags, count_tag_words):
 #default espaniol
 def read_universal_(file_name,ds_type):
   return os.getcwd() +"/"+ds_type+ "/"+file_name
+
+read_data(read_universal_('train','RU'))
