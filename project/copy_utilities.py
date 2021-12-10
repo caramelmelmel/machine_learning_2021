@@ -59,3 +59,11 @@ def estimate_transmission_parameters(count_tags, count_tag_words):
 def read_universal_(file_name,ds_type):
   return os.getcwd() +"/"+ds_type+ "/"+file_name
 
+#read the dev.in and the dev.out files properly
+#for testing
+def test_emission(dev_file,word_probabilities_label):
+  dev_inputs = open(dev_file,'r')
+  lines_in = dev_inputs.readlines()
+  for word in lines_in:
+    word = word.rstrip()
+    
