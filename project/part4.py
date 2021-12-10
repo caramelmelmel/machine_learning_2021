@@ -1,5 +1,7 @@
 #Improved sentiment analysis model
 import utilities
+import string
+import sys
 
 # Generate a list of stopwords
 # Use lemmization
@@ -17,7 +19,7 @@ def read_stopwords(stopwords_path):
     stop_words = [ele for ele in stopwords_list if ele != []]
     return stop_words
 
-def remove_stopwords_es(dataset_spanyol, stop_words_list): #input the spanish dataset here
+def remove_stopwords_es(dataset_spanyol, stop_words_list, symbols_list=[]): #input the spanish dataset here, default empty symbols
   original_dataset = []
   f = open(dataset_spanyol,"r", encoding="utf-8")
   training_set = f.readlines()
@@ -27,16 +29,29 @@ def remove_stopwords_es(dataset_spanyol, stop_words_list): #input the spanish da
       original_dataset.append("\n")
     else:
       content_line = line.split() #split into the "text" and the "tag/label" using line.split()
-      if content_line[0] in stop_words_list: #if the word belongs to the list of stopwords, assign the label O
+      if content_line[0] in stop_words_list: #if the word belongs to the list of stopwords or list of symbols, assign the label O
           content_line[1] = "O" #assign label O
-      original_dataset.append(content_line) #append to the ES dataset
+          original_dataset.append(content_line) #append to the ES dataset
+      elif content_line[0] in symbols_list:
+          continue
+          #print(content_line[0])
   #Remove empty lists within list
   Edataset = [ele for ele in original_dataset]
   return Edataset
 
+def get_symbols(edataset): #to get all of the symbols
+    symbol_set=[]
+    for element in edataset:
+        #print(element)
+        if element[0][0].isalnum() == False and element[0] not in symbol_set: #if it is not an alphabet
+            symbol_set.append(element[0])
+    return symbol_set
+
+# Russian Alphabet
+# АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя
 
 # Russian Stopwords
-# 
+# Remove symbols as well, using the stopwords method
 # Spanish Stopwords, strip from the dataset????
 # Not suitable for this use case since we are removing entries from the dev.in and dev.out
 # https://github.com/stopwords-iso/stopwords-es
@@ -45,10 +60,9 @@ def remove_stopwords_es(dataset_spanyol, stop_words_list): #input the spanish da
 
 # Naive Bayes Algorithm
 stopwordsES = read_stopwords("stopwords_ES.txt")
-#print(stopwordsES)
 
-modif = remove_stopwords_es(r"ES\train",stopwordsES)
-#print(modif)
+modif = remove_stopwords_es(r"ES\train",stopwordsES) #remove all stopwords
+print(modif)
 
 tags = utilities.count_tags_transmission(modif)
 print(sum(tags.values()))
@@ -56,9 +70,11 @@ print(sum(tags.values()))
 stopwordsRU = read_stopwords("stopwords_RU.txt")
 modif_RU = remove_stopwords_es(r"RU\train",stopwordsRU)
 tags_ru = utilities.count_tags_transmission(modif_RU)
-print(tags_ru)
+print(modif_RU)
+print(get_symbols(modif_RU))
+#print(string.printable)
+#print(tags_ru)
 #print(stopwordsRU)
-
 # Label Smoothing
 
 """
