@@ -1,6 +1,7 @@
 #Improved sentiment analysis model
 import utilities
 import string
+import part2
 
 # Generate a list of stopwords
 # Use lemmization
@@ -57,7 +58,8 @@ def get_symbols(edataset): #to get all of the symbols
 # https://www.ranks.nl/stopwords/spanish
 # Use a different algorithm, perhaps Naive Bayes Algorithm
 
-# Naive Bayes Algorithm
+# Remove Stopwords
+"""
 stopwordsES = read_stopwords("stopwords_ES.txt")
 
 modif = remove_stopwords_es(r"ES\train",stopwordsES) #remove all stopwords
@@ -65,6 +67,18 @@ print(modif)
 
 tags = utilities.count_tags_transmission(modif)
 print(sum(tags.values()))
+"""
+
+es_train = utilities.read_data_transmission(r"ES\train")
+tags = utilities.count_tags_transmission(es_train)
+tag_words = utilities.count_tag_words(es_train)
+transmission_counts = part2.count_transmissions(es_train)
+#print(transmission_counts)
+t_params = part2.estimate_transmission_parameters(transmission_counts, tags)
+print(t_params)
+#e_params = estimate_emission_parameters_with_unk(tags, tag_words)
+print("=======================")
+
 
 stopwordsRU = read_stopwords("stopwords_RU.txt")
 modif_RU = remove_stopwords_es(r"RU\train",stopwordsRU)
@@ -94,8 +108,10 @@ def smooth_labels(labels, factor=0.1):
 	# returned the smoothed labels
 	return labels
 """
+# Label Smoothing
+# https://www.pyimagesearch.com/2019/12/30/label-smoothing-with-keras-tensorflow-and-deep-learning/
 #may need to modify for PART IV, also different cases for start/stop possibly
-def smooth_labels(transmission_parameters):
+def smooth_labels_transmission(transmission_parameters):
     smoothed_dict = transmission_parameters
     alpha_sm = 0.1 #hyperparameter for label smoothing, default 0.1
     for entry in smoothed_dict: #for each dictionary
@@ -106,7 +122,7 @@ def smooth_labels(transmission_parameters):
             # there is no transition to START at all
     return smoothed_dict #return smoothed dictionary
 
-print(smooth_labels(t_params))
+print(smooth_labels_transmission(t_params))
 
 
 """
