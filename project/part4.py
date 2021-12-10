@@ -45,7 +45,7 @@ def get_symbols(edataset): #to get all of the symbols
         #print(element)
         if element[0][0].isalnum() == False and element[0] not in symbol_set: #if it is not an alphabet
             symbol_set.append(element[0])
-    return sorted(symbol_set)
+    return symbol_set
 
 # Russian Alphabet
 # АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя
@@ -70,6 +70,8 @@ print(sum(tags.values()))
 stopwordsRU = read_stopwords("stopwords_RU.txt")
 modif_RU = remove_stopwords_es(r"RU\train",stopwordsRU)
 tags_ru = utilities.count_tags_transmission(modif_RU)
+print(modif_RU)
+print(get_symbols(modif_RU))
 #print(string.printable)
 #print(tags_ru)
 #print(stopwordsRU)
