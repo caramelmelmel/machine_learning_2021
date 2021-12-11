@@ -83,3 +83,16 @@ def estimate_transmission_parameters(count_tags, count_tag_words):
 #pass in the file name as the string
 def read_universal(file_name):
   return os.getcwd() + file_name
+
+def read_dev(path):
+  out = [[]]
+  f = open(path, "r", encoding="utf-8")
+  lines_in = f.readlines()
+  for word in lines_in:
+    if word == "\n":
+      out.append([])
+    else:
+      out[-1].append(word.rstrip())
+  return out[:-1]
+  
+    

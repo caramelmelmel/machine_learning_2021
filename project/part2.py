@@ -47,20 +47,23 @@ def estimate_emission_parameters_with_unk(count_tags, count_tag_words,k=1):
     all_estimations[unique_tag_tuple[0]] = single_tag_estimation
   return all_estimations
 
-# def logarify(dict):
-#     out = {}
-#     for key, inner_dict in dict.items():
-#         out[key] = inner_dict
-#         print(inner_dict)
-#         for inner_key, value in inner_dict.items():
-#             out[key][inner_key] = math.log(value)
-            
-#     return out
+# Input: list of lists containing word, label, with "\n" delimiting new lines. Output of read_data_transmission.
+# Output: list of documents (which are lists containing word, label). 3-layer listing.
+def separate_documents(data):
+    out = [[]]
+    for i in data:
+        if i == '\n':
+            out.append([])
+        else:
+            out[-1].append(i)
 
-# Viterbi algorithm
+    # To get rid of the last empty array
+    return out[:-1]
+
+# Viterbi algorithm to predict output labels on each document.
+# Note: should be called on EACH DOCUMENT of the VALIDATION/TEST set (data is a list of list containing strings)
 # a(u,v) is t_params
 # b(u,o) is e_params
-
 def viterbi(data, t_params, e_params):
     n = len(data)
     # Includes only possible labels for the words in our dataset: ie. excludes 'START' and 'STP{}
@@ -95,7 +98,7 @@ def viterbi(data, t_params, e_params):
     # the START token is not part of the dataset - so we iterate until n+1.
     # ie. from 1 to n instead of 0 to n-1.
     for j in range(1, n):
-        next_word = data[j][0]
+        next_word = data[j]
         # Iterate over all of the current labels in this step.
         for u in labels:
             maximum = -sys.float_info.max
@@ -141,29 +144,70 @@ def viterbi(data, t_params, e_params):
     cache[n+1]['STOP'][0] = math.exp(maximum)
     cache[n+1]['STOP'][1] = max_label
 
-    print("n-1:", cache[n-1])
-    print("n", cache[n])
-    print("n+1", cache[n+1])
+    # for i in range(len(cache)):
+    #     print(i, cache[i])
+    # print('\n')
     
     # Finding the most probable labels.
     output = ['' for i in range(n)]
-    # for the case n (nth word)
+    # for the nth word
     output[n-1] = max_label
-    # for the case n-1 until case 1 (1st word)
-    for j in range(n-1, 0, -1):
+    # for the n-1th to 1st word
+    for j in range(n, 1, -1):
+        # print("step", j, "old max:", max_label, "in cache:", cache[j])
         max_label = cache[j][max_label][1]
-        output[j-1] = max_label
+        output[j-2] = max_label
     
     return output
+
+def viterbi_loop(separated, t_params, e_params):
+    final = []
+    for doc in separated:
+        final.append(viterbi(doc, t_params, e_params))
+    return final
+
+# Input: dev_set (list of lists of strings)
+def output_prediction(prediction, data, path):
+    assert(len(prediction) == len(data))
+    file = open(path, "w", encoding="utf-8")
+    n = len(data)
+    print("Writing", n, "lines")
+    for i in range(n):
+        assert(len(data[i]) == len(prediction[i]))
+        m = len(data[i])
+        for j in range(m):
+            file.write(data[i][j] + " " + prediction[i][j] + "\n")
+        file.write("\n")
+    print("Wrote predictions to", path)
 
 
 ## Actual running code
 #Outputs list (size n) of list (size 2) in this form: ['word', 'label']
 es_train = utilities.read_data_transmission(r"ES\train")
+es_dev = utilities.read_dev(r"ES\dev.in")
+# print(es_dev)
+# separated = separate_documents(es_train)
 tags = utilities.count_tags_transmission(es_train)
 tag_words = utilities.count_tag_words(es_train)
 transmission_counts = count_transmissions(es_train)
 t_params = estimate_transmission_parameters(transmission_counts, tags)
 e_params = estimate_emission_parameters_with_unk(tags, tag_words)
 
-viterbi(es_train, t_params, e_params)
+# ru_train = utilities.read_data_transmission(r"RU\train")
+
+## Testing viterbi
+# test = separated[0]
+# output_sequence = viterbi(test, t_params, e_params)
+# print('\n')
+# print("ogiginal length", len(test))
+# print('\n')
+# print(test)
+# print("output length", len(output_sequence))
+# print('\n')
+# print(output_sequence)
+
+## Actual viterbi
+prediction = viterbi_loop(es_dev, t_params, e_params)
+
+## Output into dev.out
+output_prediction(prediction, es_dev, r"ES\dev.p2.out")
