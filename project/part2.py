@@ -60,14 +60,22 @@ def separate_documents(data):
     # To get rid of the last empty array
     return out[:-1]
 
+def get_training_set_words(data):
+    words = set()
+    for i in data:
+        if len(data) > 1:
+            words.add(i[0])
+    return words
+
 # Viterbi algorithm to predict output labels on each document.
 # Note: should be called on EACH DOCUMENT of the VALIDATION/TEST set (data is a list of list containing strings)
 # a(u,v) is t_params
 # b(u,o) is e_params
-def viterbi(data, t_params, e_params):
+def viterbi(data, t_params, e_params, word_set):
+    # print("Beginning viterbi for", data)
     n = len(data)
-    # Includes only possible labels for the words in our dataset: ie. excludes 'START' and 'STP{}
-    labels = ['O', 'B-positive', 'B-neutral', 'B-negative', 'I-positive', 'I-neutral', 'I-negative']
+    # Includes only possible labels for the words in our dataset: ie. excludes 'START' and 'STOP'
+    labels = ['O', 'B-positive', 'B-neutral', 'B-negative', 'I-positive', 'I-neutral', 'I-negative', 'START']
 
     # Initialization.
     # cache is a list, where the list index represents the current position in the data
@@ -76,73 +84,73 @@ def viterbi(data, t_params, e_params):
     # each possible label maps to a list of format [probability up to this point, parent label]
     # 0: START 1: 1st word ... n: nth word n+1: END --> size = n+2
 
-    cache = [{'START':[0, None],
-    'STOP': [0, None], 
-    'O':[0, None],
-    'B-positive':[0, None],
-    'B-neutral':[0, None],
-    'B-negative':[0, None],
-    'I-positive':[0, None],
-    'I-neutral':[0, None],
-    'I-negative':[0, None]} for i in range(n+2)]
+    n_inf = -math.inf
+    cache = [{'START':[n_inf, None],
+    'STOP': [n_inf, None], 
+    'O':[n_inf, None],
+    'B-positive':[n_inf, None],
+    'B-neutral':[n_inf, None],
+    'B-negative':[n_inf, None],
+    'I-positive':[n_inf, None],
+    'I-neutral':[n_inf, None],
+    'I-negative':[n_inf, None]} for i in range(n+2)]
 
-    cache[0]['START'][0] = 1
-    # 1st step from 'START' to first label - there is only 1 label that meets this condition and only 1 path for this step.
-    for label, prob in t_params['START'].items():
-        if prob > 0:
-            cache[1][label][0] = 1
-            cache[1][label][1] = 'START'
-            break
+    cache[0]['START'][0] = 0 # Technically this should be 0
 
-    # 0th value of the cache is the START token, but the 0th value of the dataset is the 1st word.
-    # the START token is not part of the dataset - so we iterate until n+1.
-    # ie. from 1 to n instead of 0 to n-1.
-    for j in range(1, n):
+    for j in range(0, n):
         next_word = data[j]
+        # print("\n\n Step", j+1, "current word is:", next_word)
         # Iterate over all of the current labels in this step.
         for u in labels:
-            maximum = -sys.float_info.max
-            max_label = ''
+            # print("\n Checking u: ", u)
+            maximum = n_inf
+            max_label = None
             # Because we want to find the maximum v
             for v in labels:
-                # print("transmission from", v, "to", u)
                 # If any of the observed probabilities are 0, we should skip because that is an impossible path
-                if (cache[j][v][0] == 0 or t_params[v][u] == 0):
+                if (cache[j][v][0] == n_inf or t_params[v][u] == 0):
                     # print(v, "to", u, "is impossible")
                     continue
                 prev_cached_value = cache[j][v][0]
-                # print('now logging cache', cache[j][u][0], t_params[v][u])
-                if next_word not in e_params[u].keys():
-                    # print("the next word is not in our dictionary. using the #UNK# probability")
-                    emission_prob = math.log(e_params[u]['#UNK#'])
+                if next_word in word_set:
+                    if next_word not in e_params[u].keys():
+                        # print("impossible emission: word in training set yet not seen for this label.")
+                        continue
+                    else:
+                        emission_prob = e_params[u][next_word]
                 else:
-                    # print("word in our dictionary")
-                    emission_prob = math.log(e_params[u][next_word])
-                transmission_prob = math.log(t_params[v][u])
-                prob = prev_cached_value + emission_prob + transmission_prob
-                # print(v, 'to', u, 'word:', next_word, 'has prob', prob)
+                    # print("not in training set. using the #UNK# probability")
+                    emission_prob = e_params[u]['#UNK#']
+                transmission_prob = t_params[v][u]
+                # print("cache:", prev_cached_value, "emiss:", emission_prob, "trans:", transmission_prob)
+                prob = prev_cached_value + math.log(emission_prob) + math.log(transmission_prob)
+                # print(v, 'to', u, 'emitting', next_word, 'has prob', prob)
                 if maximum < prob:
                     maximum = prob
                     max_label = v
-                
-            cache[j+1][u][0] = math.exp(maximum)
+            
+            # print('best v is', max_label, 'with prob', maximum)
+            if maximum == n_inf:
+                continue
+            cache[j+1][u][0] = maximum
             cache[j+1][u][1] = max_label
     
     # Final Step (n+1)
-    maximum = -sys.float_info.max
-    max_label = ''
+    maximum = n_inf
+    max_label = None
     for v in labels:
         prev_cached_value = cache[n][v][0]
         transmission_prob = t_params[v]['STOP']
         if (prev_cached_value == 0 or transmission_prob == 0):
             continue
-        prob = math.log(prev_cached_value) + math.log(transmission_prob)
+        prob = prev_cached_value + math.log(transmission_prob)
         if maximum < prob:
             maximum = prob
             max_label = v
 
-    cache[n+1]['STOP'][0] = math.exp(maximum)
-    cache[n+1]['STOP'][1] = max_label
+    if maximum != n_inf:
+        cache[n+1]['STOP'][0] = maximum
+        cache[n+1]['STOP'][1] = max_label
 
     # for i in range(len(cache)):
     #     print(i, cache[i])
@@ -150,20 +158,25 @@ def viterbi(data, t_params, e_params):
     
     # Finding the most probable labels.
     output = ['' for i in range(n)]
-    # for the nth word
-    output[n-1] = max_label
+
+    # Default to "O" if emission isn't possible.
+    if max_label == None:
+        max_label = "O"
+
     # for the n-1th to 1st word
-    for j in range(n, 1, -1):
+    for j in range(n+1, 1, -1):
         # print("step", j, "old max:", max_label, "in cache:", cache[j])
         max_label = cache[j][max_label][1]
+        if max_label == None:
+            max_label = "O"
         output[j-2] = max_label
     
     return output
 
-def viterbi_loop(separated, t_params, e_params):
+def viterbi_loop(separated, t_params, e_params, word_set):
     final = []
     for doc in separated:
-        final.append(viterbi(doc, t_params, e_params))
+        final.append(viterbi(doc, t_params, e_params, word_set))
     return final
 
 # Input: dev_set (list of lists of strings)
@@ -184,6 +197,7 @@ def output_prediction(prediction, data, path):
 ## Actual running code
 #Outputs list (size n) of list (size 2) in this form: ['word', 'label']
 es_train = utilities.read_data_transmission(r"ES\train")
+train_words = get_training_set_words(es_train)
 es_dev = utilities.read_dev(r"ES\dev.in")
 # print(es_dev)
 # separated = separate_documents(es_train)
@@ -193,21 +207,25 @@ transmission_counts = count_transmissions(es_train)
 t_params = estimate_transmission_parameters(transmission_counts, tags)
 e_params = estimate_emission_parameters_with_unk(tags, tag_words)
 
+# file = open("e_params", "w", encoding="utf-8")
+# file.write(str(e_params))
+
 # ru_train = utilities.read_data_transmission(r"RU\train")
 
-## Testing viterbi
-# test = separated[0]
-# output_sequence = viterbi(test, t_params, e_params)
-# print('\n')
-# print("ogiginal length", len(test))
-# print('\n')
-# print(test)
-# print("output length", len(output_sequence))
+# # Testing viterbi
+# test = ['Con', 'lo', 'cual', 'en', 'el', 'comedor', 'tienes', 'que', 'levantar', 'mas', 'la', 'voz', 
+# 'para', 'oirte', 'y', 'se', 'forma', 'un', 'ambiente', 'que', 'no', 'lo', 'que', 'se', 'espera', 'de', 'una', 'estrella', 'michelin', '.']
+# output_sequence = viterbi(test, t_params, e_params, train_words)
+# # print('\n')
+# # print("ogiginal length", len(test))
+# # print('\n')
+# # print(test)
+# # print("output length", len(output_sequence))
 # print('\n')
 # print(output_sequence)
 
 ## Actual viterbi
-prediction = viterbi_loop(es_dev, t_params, e_params)
+prediction = viterbi_loop(es_dev, t_params, e_params, train_words)
 
 ## Output into dev.out
 output_prediction(prediction, es_dev, r"ES\dev.p2.out")
