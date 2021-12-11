@@ -194,23 +194,17 @@ def output_prediction(prediction, data, path):
     print("Wrote predictions to", path)
 
 
-## Actual running code
-#Outputs list (size n) of list (size 2) in this form: ['word', 'label']
-es_train = utilities.read_data_transmission(r"ES\train")
-train_words = get_training_set_words(es_train)
-es_dev = utilities.read_dev(r"ES\dev.in")
-# print(es_dev)
-# separated = separate_documents(es_train)
-tags = utilities.count_tags_transmission(es_train)
-tag_words = utilities.count_tag_words(es_train)
-transmission_counts = count_transmissions(es_train)
-t_params = estimate_transmission_parameters(transmission_counts, tags)
-e_params = estimate_emission_parameters_with_unk(tags, tag_words)
-
-# file = open("e_params", "w", encoding="utf-8")
-# file.write(str(e_params))
-
-# ru_train = utilities.read_data_transmission(r"RU\train")
+def run_viterbi(training_path, test_path, output_path):
+    train = utilities.read_data_transmission(training_path)
+    train_words = get_training_set_words(train)
+    test = utilities.read_dev(test_path)
+    tags = utilities.count_tags_transmission(train)
+    tag_words = utilities.count_tag_words(train)
+    transmission_counts = count_transmissions(train)
+    t_params = estimate_transmission_parameters(transmission_counts, tags)
+    e_params = estimate_emission_parameters_with_unk(tags, tag_words)
+    prediction = viterbi_loop(test, t_params, e_params, train_words)
+    output_prediction(prediction, test, output_path)
 
 # # Testing viterbi
 # test = ['Con', 'lo', 'cual', 'en', 'el', 'comedor', 'tienes', 'que', 'levantar', 'mas', 'la', 'voz', 
@@ -224,8 +218,6 @@ e_params = estimate_emission_parameters_with_unk(tags, tag_words)
 # print('\n')
 # print(output_sequence)
 
-## Actual viterbi
-prediction = viterbi_loop(es_dev, t_params, e_params, train_words)
-
-## Output into dev.out
-output_prediction(prediction, es_dev, r"ES\dev.p2.out")
+## Actual viterbi calls
+run_viterbi(r"ES/train", r"ES/dev.in", r"ES/dev.p2.out")
+run_viterbi(r"RU/train", r"RU/dev.in", r"RU/dev.p2.out")
