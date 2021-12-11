@@ -1,6 +1,6 @@
 import utilities
 import math
-import sys
+import part1
 
 ## This is code to obtain the transmission parameters
 
@@ -35,37 +35,6 @@ def estimate_transmission_parameters(transmission_count, tags_count):
             transmission_prob['START'][first_label] = 1
     """
     return transmission_prob
-
-def estimate_emission_parameters_with_unk(count_tags, count_tag_words,k=1):
-  all_estimations = {} #dictionary
-  for unique_tag_tuple in count_tag_words.items():
-    single_tag_estimation = {} #dictionary
-    for word_count in unique_tag_tuple[1].items():
-      estimated_value = word_count[1]/(count_tags[unique_tag_tuple[0]] + k) #this is the label y count
-      single_tag_estimation[word_count[0]] = estimated_value
-    single_tag_estimation['#UNK#'] = k/(count_tags[unique_tag_tuple[0]] + k)
-    all_estimations[unique_tag_tuple[0]] = single_tag_estimation
-  return all_estimations
-
-# Input: list of lists containing word, label, with "\n" delimiting new lines. Output of read_data_transmission.
-# Output: list of documents (which are lists containing word, label). 3-layer listing.
-def separate_documents(data):
-    out = [[]]
-    for i in data:
-        if i == '\n':
-            out.append([])
-        else:
-            out[-1].append(i)
-
-    # To get rid of the last empty array
-    return out[:-1]
-
-def get_training_set_words(data):
-    words = set()
-    for i in data:
-        if len(data) > 1:
-            words.add(i[0])
-    return words
 
 # Viterbi algorithm to predict output labels on each document.
 # Note: should be called on EACH DOCUMENT of the VALIDATION/TEST set (data is a list of list containing strings)
@@ -179,38 +148,18 @@ def viterbi_loop(separated, t_params, e_params, word_set):
         final.append(viterbi(doc, t_params, e_params, word_set))
     return final
 
-# Input: dev_set (list of lists of strings)
-def output_prediction(prediction, data, path):
-    assert(len(prediction) == len(data))
-    file = open(path, "w", encoding="utf-8")
-    n = len(data)
-    print("Writing", n, "lines")
-    for i in range(n):
-        assert(len(data[i]) == len(prediction[i]))
-        m = len(data[i])
-        for j in range(m):
-            file.write(data[i][j] + " " + prediction[i][j] + "\n")
-        file.write("\n")
-    print("Wrote predictions to", path)
 
-
-## Actual running code
-#Outputs list (size n) of list (size 2) in this form: ['word', 'label']
-es_train = utilities.read_data_transmission(r"ES\train")
-train_words = get_training_set_words(es_train)
-es_dev = utilities.read_dev(r"ES\dev.in")
-# print(es_dev)
-# separated = separate_documents(es_train)
-tags = utilities.count_tags_transmission(es_train)
-tag_words = utilities.count_tag_words(es_train)
-transmission_counts = count_transmissions(es_train)
-t_params = estimate_transmission_parameters(transmission_counts, tags)
-e_params = estimate_emission_parameters_with_unk(tags, tag_words)
-
-# file = open("e_params", "w", encoding="utf-8")
-# file.write(str(e_params))
-
-# ru_train = utilities.read_data_transmission(r"RU\train")
+def run_viterbi(training_path, test_path, output_path):
+    train = utilities.read_data_transmission(training_path)
+    train_words = utilities.get_training_set_words(train)
+    test = utilities.read_dev(test_path)
+    tags = utilities.count_tags_transmission(train)
+    tag_words = utilities.count_tag_words(train)
+    transmission_counts = count_transmissions(train)
+    t_params = estimate_transmission_parameters(transmission_counts, tags)
+    e_params = part1.estimate_emission_parameters_with_unk(tags, tag_words)
+    prediction = viterbi_loop(test, t_params, e_params, train_words)
+    utilities.output_prediction(prediction, test, output_path)
 
 # # Testing viterbi
 # test = ['Con', 'lo', 'cual', 'en', 'el', 'comedor', 'tienes', 'que', 'levantar', 'mas', 'la', 'voz', 
@@ -224,8 +173,6 @@ e_params = estimate_emission_parameters_with_unk(tags, tag_words)
 # print('\n')
 # print(output_sequence)
 
-## Actual viterbi
-prediction = viterbi_loop(es_dev, t_params, e_params, train_words)
-
-## Output into dev.out
-output_prediction(prediction, es_dev, r"ES\dev.p2.out")
+## Actual viterbi calls
+run_viterbi(r"ES/train", r"ES/dev.in", r"ES/dev.p2.out")
+run_viterbi(r"RU/train", r"RU/dev.in", r"RU/dev.p2.out")

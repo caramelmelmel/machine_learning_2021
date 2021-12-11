@@ -23,8 +23,12 @@ def read_data_transmission(path):
     if len(line) == 1:
       dataset.append("\n")
     else:
-      content_line = line.split() #split into the "text" and the "tag/label" using line.split()
-      dataset.append(content_line) #append to the ES dataset
+      line = line.rstrip('\n')
+      line = line.rpartition(' ')
+      line = list(line)
+      del line[1]
+      if line != ['', '']:
+        dataset.append(line)
   #Remove empty lists within list
   Edataset = [ele for ele in dataset]
   return Edataset
@@ -95,4 +99,23 @@ def read_dev(path):
       out[-1].append(word.rstrip())
   return out[:-1]
   
-    
+def get_training_set_words(data):
+    words = set()
+    for i in data:
+        if len(data) > 1:
+            words.add(i[0])
+    return words
+  
+# Input: dev_set (list of lists of strings)
+def output_prediction(prediction, data, path):
+    assert(len(prediction) == len(data))
+    file = open(path, "w", encoding="utf-8")
+    n = len(data)
+    print("Writing", n, "lines")
+    for i in range(n):
+        assert(len(data[i]) == len(prediction[i]))
+        m = len(data[i])
+        for j in range(m):
+            file.write(data[i][j] + " " + prediction[i][j] + "\n")
+        file.write("\n")
+    print("Wrote predictions to", path)
