@@ -23,8 +23,12 @@ def read_data_transmission(path):
     if len(line) == 1:
       dataset.append("\n")
     else:
-      content_line = line.split() #split into the "text" and the "tag/label" using line.split()
-      dataset.append(content_line) #append to the ES dataset
+      line = line.rstrip('\n')
+      line = line.rpartition(' ')
+      line = list(line)
+      del line[1]
+      if line != ['', '']:
+        dataset.append(line)
   #Remove empty lists within list
   Edataset = [ele for ele in dataset]
   return Edataset
