@@ -79,7 +79,6 @@ print(t_params)
 #e_params = estimate_emission_parameters_with_unk(tags, tag_words)
 print("=======================")
 
-
 stopwordsRU = read_stopwords("stopwords_RU.txt")
 modif_RU = remove_stopwords_es(r"RU\train",stopwordsRU)
 tags_ru = utilities.count_tags_transmission(modif_RU)
