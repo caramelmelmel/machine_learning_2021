@@ -23,10 +23,18 @@ You should receive the outputs in the `ES/dev.p1.out` file and also that in the 
 
 b. Evaluating result
 
-For the Russian dataset:
+For the Russian dataset:<br/>
+For MacOS/Linux/ Powershell:<br/>
 ```python3 EvalScript/EvalScript.py RU/dev.out RU/dev.p1.out```
 
-For the Spanish dataset:
+For Command Prompt(Windows):
+```python EvalScript/EvalScript.py RU/dev.out RU/dev.p1.out```
+
+For the Spanish dataset:<br/>
+For MacOS/Linux/ Powershell:<br/>
+```python3 EvalScript/EvalScript.py ES/dev.out ES/dev.p1.out```
+
+For Command Prompt (Windows):
 ```python3 EvalScript/EvalScript.py ES/dev.out ES/dev.p1.out```
 
 ### Part 2
@@ -36,11 +44,19 @@ You should receive the outputs in the `ES/dev.p2.out` file and also that in the 
 
 b. Evaluating result
 
-For the Russian dataset:
+For the Russian dataset:<br/>
+For MacOS/Linux/ Powershell:<br/>
 ```python3 EvalScript/EvalScript.py RU/dev.out RU/dev.p2.out```
 
+For Command Prompt(Windows):
+```python EvalScript/EvalScript.py RU/dev.out RU/dev.p2.out```
+
 For the Spanish dataset:
+For MacOS/Linux/ Powershell:<br/>
 ```python3 EvalScript/EvalScript.py ES/dev.out ES/dev.p2.out```
+
+For Command Prompt:
+```python EvalScript/EvalScript.py ES/dev.out ES/dev.p2.out```
 
 
 
