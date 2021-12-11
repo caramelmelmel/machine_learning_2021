@@ -99,4 +99,23 @@ def read_dev(path):
       out[-1].append(word.rstrip())
   return out[:-1]
   
-    
+def get_training_set_words(data):
+    words = set()
+    for i in data:
+        if len(data) > 1:
+            words.add(i[0])
+    return words
+  
+# Input: dev_set (list of lists of strings)
+def output_prediction(prediction, data, path):
+    assert(len(prediction) == len(data))
+    file = open(path, "w", encoding="utf-8")
+    n = len(data)
+    print("Writing", n, "lines")
+    for i in range(n):
+        assert(len(data[i]) == len(prediction[i]))
+        m = len(data[i])
+        for j in range(m):
+            file.write(data[i][j] + " " + prediction[i][j] + "\n")
+        file.write("\n")
+    print("Wrote predictions to", path)
