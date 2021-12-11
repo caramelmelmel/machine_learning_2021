@@ -123,6 +123,11 @@ def smooth_labels_transmission(transmission_parameters):
 
 print(smooth_labels_transmission(t_params))
 
+def smooth_labels_emission(emission_parameters):
+    smoothed_dict = emission_parameters
+    alpha_sm = 0.1 #hyperparameter for label smoothing, default 0.1
+    for entry in smoothed_dict:
+
 
 """
 # https://github.com/ongkahyuan/ML-project/blob/main/part5.py
