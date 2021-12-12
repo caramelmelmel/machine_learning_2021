@@ -151,10 +151,10 @@ def viterbi_loop(separated, t_params, e_params, word_set):
 
 
 def run_viterbi(training_path, test_path, output_path):
-    train = utilities.read_data_transmission(training_path)
+    train = utilities.read_data(training_path)
     train_words = utilities.get_training_set_words(train)
     test = utilities.read_dev(test_path)
-    tags = utilities.count_tags_transmission(train)
+    tags = utilities.count_tags(train)
     tag_words = utilities.count_tag_words(train)
     transmission_counts = count_transmissions(train)
     t_params = estimate_transmission_parameters(transmission_counts, tags)

@@ -54,11 +54,6 @@ def viterbi_5th(data, t_params, e_params, word_set):
 
     cache[0]['START'][0] = 0 # Technically this should be 0
 
-    #for i in range(5):
-    #    print(i)
-    #    print(cache)
-    #quit()
-
 # USE ANOTHER APPROACH KEEP A LIST OF 5 PARENTS IN EACH OF THE 
     #use a global list/heap to store all possible VITERBI scores for all the paths
     # global list of sequences, sequence score and keep all the parents up to that state # Separate List
@@ -144,7 +139,7 @@ def viterbi_5th(data, t_params, e_params, word_set):
 
         # AT LAST STEP THE SEQUENCE WILL HAVE LENGTH OF N + 2
         # WE ONLY APPEND IF THE SEQUENCE IS ONE LESS THAN THE MAXIMUM
-        print("n", n)
+        # print("n", n)
         sequence = all_viterbi_list[0][1]
         # just append Os until you reach the LENGTH
         if len(sequence) == n+2: # J = 0 is step 1, where in step 1 the sequence will only include START, length 1
@@ -153,7 +148,7 @@ def viterbi_5th(data, t_params, e_params, word_set):
             sequence[-1] = 'STOP'
         else: #ONLY FOR THIS CASE - NEED TO EXTEND ALL BEST SEQUENCES
             sequence = sequence + ['O']*(n+1 - len(sequence)) + ["STOP"] #add Os until it reach the length and ensure the last thing is STOP
-            print("seqlen", len(sequence))
+            # print("seqlen", len(sequence))
 
         all_viterbi_list.append([prob, sequence])
 
@@ -175,10 +170,10 @@ def viterbi_loop_5th(separated, t_params, e_params, word_set):
     return final
 
 def run_viterbi_5th(training_path, test_path, output_path):
-    train = utilities.read_data_transmission(training_path)
+    train = utilities.read_data(training_path)
     train_words = utilities.get_training_set_words(train)
     test = utilities.read_dev(test_path)
-    tags = utilities.count_tags_transmission(train)
+    tags = utilities.count_tags(train)
     tag_words = utilities.count_tag_words(train)
     transmission_counts = part2.count_transmissions(train)
     t_params =  part2.estimate_transmission_parameters(transmission_counts, tags)
@@ -202,12 +197,12 @@ if __name__ == '__main__':
 
 ## Actual running code
 #Outputs list (size n) of list (size 2) in this form: ['word', 'label']
-# es_train = utilities.read_data_transmission(r"ES\train")
+# es_train = utilities.read_data(r"ES\train")
 # train_words = get_training_set_words(es_train)
 # es_dev = utilities.read_dev(r"ES\dev.in")
 # # print(es_dev)
 # # separated = separate_documents(es_train)
-# tags = utilities.count_tags_transmission(es_train)
+# tags = utilities.count_tags(es_train)
 # tag_words = utilities.count_tag_words(es_train)
 # transmission_counts = count_transmissions(es_train)
 # t_params = estimate_transmission_parameters(transmission_counts, tags)
@@ -216,7 +211,7 @@ if __name__ == '__main__':
 # file = open("e_params", "w", encoding="utf-8")
 # file.write(str(e_params))
 
-# ru_train = utilities.read_data_transmission(r"RU\train")
+# ru_train = utilities.read_data(r"RU\train")
 
 # # Testing viterbi
 # test = ['Con', 'lo', 'cual', 'en', 'el', 'comedor', 'tienes', 'que', 'levantar', 'mas', 'la', 'voz', 

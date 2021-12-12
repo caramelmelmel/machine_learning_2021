@@ -44,9 +44,9 @@ def prediction_loop(separated, e_params, word_set):
 
 # Wrapper function that trains the emission parameters and runs the predictor on the
 def run_emission_prediction(training_path, test_path, output_path):
-    train = utilities.read_data_transmission(training_path)
+    train = utilities.read_data(training_path)
     train_words = utilities.get_training_set_words(train)
-    tags = utilities.count_tags_transmission(train)
+    tags = utilities.count_tags(train)
     test = utilities.read_dev(test_path)
     tag_words = utilities.count_tag_words(train)
     e_params = estimate_emission_parameters_with_unk(tags, tag_words)

@@ -2,11 +2,9 @@ import os
 
 ## Contains utilities (data reading, counting, data writing) shared by all of the parts.
 
-## TODO: rename to read_train?
-# FOR TRANSMISSION EDITED
 # Used to read all training sets that are of form ['word' label']
 # Outputs list (size n) of lists (size of each sentence) of lists (size 2) in the form: ['word', 'label']
-def read_data_transmission(path):
+def read_data(path):
   dataset = []
   f = open(path,"r", encoding="utf-8")
   training_set = f.readlines()
@@ -25,10 +23,9 @@ def read_data_transmission(path):
   Edataset = [ele for ele in dataset]
   return Edataset
 
-## TODO: rename to count_tags?
-# COUNT TAGS TRANSMISSION
-# This is a modification of count_tags to also take into account the START/STOP states as indicated by new lines.
-def count_tags_transmission(training_set):
+# COUNT TAGS 
+# This counts tags and takes into account the START/STOP states as indicated by new lines.
+def count_tags(training_set):
   unique_tag_count = {'START':0,'O':0,'B-positive':0,'B-neutral':0,'B-negative':0,'I-positive':0,'I-neutral':0,'I-negative':0,'STOP':0}
   #to store the unique tag + the total count of each from the training dataset
   for data_pair in training_set:

@@ -65,12 +65,12 @@ stopwordsES = read_stopwords("stopwords_ES.txt")
 modif = remove_stopwords_es(r"ES\train",stopwordsES) #remove all stopwords
 print(modif)
 
-tags = utilities.count_tags_transmission(modif)
+tags = utilities.count_tags(modif)
 print(sum(tags.values()))
 """
 
-es_train = utilities.read_data_transmission(r"ES\train")
-tags = utilities.count_tags_transmission(es_train)
+es_train = utilities.read_data(r"ES\train")
+tags = utilities.count_tags(es_train)
 tag_words = utilities.count_tag_words(es_train)
 transmission_counts = part2.count_transmissions(es_train)
 #print(transmission_counts)
@@ -81,7 +81,7 @@ print("=======================")
 
 stopwordsRU = read_stopwords("stopwords_RU.txt")
 modif_RU = remove_stopwords_es(r"RU\train",stopwordsRU)
-tags_ru = utilities.count_tags_transmission(modif_RU)
+tags_ru = utilities.count_tags(modif_RU)
 print(modif_RU)
 print(get_symbols(modif_RU))
 #print(string.printable)
