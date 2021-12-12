@@ -1,5 +1,6 @@
 import utilities
 import math
+import sys
 import part1
 
 ## This is code to obtain the transmission parameters
@@ -175,5 +176,13 @@ def run_viterbi(training_path, test_path, output_path):
 
 ## Actual viterbi calls
 if __name__ == '__main__':
-    run_viterbi(r"ES/train", r"ES/dev.in", r"ES/dev.p2.out")
-    run_viterbi(r"RU/train", r"RU/dev.in", r"RU/dev.p2.out")
+    n = len(sys.argv)
+
+    if n == 1:
+        run_viterbi(r"ES/train", r"ES/dev.in", r"ES/dev.p2.out")
+        run_viterbi(r"RU/train", r"RU/dev.in", r"RU/dev.p2.out")
+    else:
+        if n == 4:
+            run_viterbi(sys.argv[1], sys.argv[2], sys.argv[3])
+        else:
+            print("usage: python part2.py [train_path] [test_path] [output_path]")

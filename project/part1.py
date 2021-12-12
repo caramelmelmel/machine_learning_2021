@@ -1,4 +1,5 @@
 import utilities
+import sys
 
 # Estimates emission parameters using MLE.
 # Adds an #UNK# token for use when we encounter a word in the test set that is not in our training set.
@@ -53,5 +54,13 @@ def run_emission_prediction(training_path, test_path, output_path):
     utilities.output_prediction(prediction, test, output_path)
 
 if __name__ == '__main__':
-    run_emission_prediction(r"ES/train", r"ES/dev.in", r"ES/dev.p1.out")
-    run_emission_prediction(r"RU/train", r"RU/dev.in", r"RU/dev.p1.out")
+    n = len(sys.argv)
+
+    if n == 1:
+        run_emission_prediction(r"ES/train", r"ES/dev.in", r"ES/dev.p1.out")
+        run_emission_prediction(r"RU/train", r"RU/dev.in", r"RU/dev.p1.out")
+    else:
+        if n == 4:
+            run_emission_prediction(sys.argv[1], sys.argv[2], sys.argv[3])
+        else:
+            print("usage: python part1.py [train_path] [test_path] [output_path]")
