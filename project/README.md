@@ -17,51 +17,29 @@ Note: If you are running Windows, use ```python``` instead of ```python3``` for 
 2. Second Alternative (submitted files): <br/>
 ```cd ${PWD}/project```
 
-### Part 1 (Sentiment Analysis using Emission Parameters)
+### Running the Script
+The same commands can be run for each of the parts, just changing the [x] from 1 to 4.
 a. Training and Predicting (Test): <br/>
-```python3 part1.py```<br/>
-You should receive the outputs in the `ES/dev.p1.out` file and also that in the `RU/dev.p1.out`. <br/>
+```python3 part[x].py```<br/>
+You should receive the outputs in the `ES/dev.p[x].out` file and also that in the `RU/dev.p[x].out`. <br/>
 You may also supply a custom training, test, and output file path by adding arguments: <br/>
-```python3 part1.py [train_path] [test_path] [output_path]```
+```python3 part[x].py [train_path] [test_path] [output_path]```
 
 b. Evaluating result
 
 For the Russian dataset:<br/>
 For MacOS/Linux/ Powershell:<br/>
-```python3 EvalScript/EvalScript.py RU/dev.out RU/dev.p1.out```
+```python3 EvalScript/EvalScript.py RU/dev.out RU/dev.p[x].out```
 
 For Command Prompt(Windows):<br/>
-```python EvalScript/EvalScript.py RU/dev.out RU/dev.p1.out```
+```python EvalScript/EvalScript.py RU/dev.out RU/dev.p[x].out```
 
 For the Spanish dataset:<br/>
 For MacOS/Linux/ Powershell:<br/>
-```python3 EvalScript/EvalScript.py ES/dev.out ES/dev.p1.out```
+```python3 EvalScript/EvalScript.py ES/dev.out ES/dev.p[x].out```
 
 For Command Prompt (Windows): <br/>
-```python EvalScript/EvalScript.py ES/dev.out ES/dev.p1.out```
-
-### Part 2 (Viterbi, using Emission and Transmission Parameters)
-a. Training and Predicting (Test): <br/>
-```python3 part2.py```
-You should receive the outputs in the `ES/dev.p2.out` file and also that in the `RU/dev.p2.out`. <br/>
-You may also supply a custom training, test, and output file path by adding arguments: <br/>
-```python3 part2.py [train_path] [test_path] [output_path]```
-
-b. Evaluating result
-
-For the Russian dataset:<br/>
-For MacOS/Linux/ Powershell:<br/>
-```python3 EvalScript/EvalScript.py RU/dev.out RU/dev.p2.out```
-
-For Command Prompt(Windows):<br/>
-```python EvalScript/EvalScript.py RU/dev.out RU/dev.p2.out```
-
-For the Spanish dataset:
-For MacOS/Linux/ Powershell:<br/>
-```python3 EvalScript/EvalScript.py ES/dev.out ES/dev.p2.out```
-
-For Command Prompt:<br/>
-```python EvalScript/EvalScript.py ES/dev.out ES/dev.p2.out```
+```python EvalScript/EvalScript.py ES/dev.out ES/dev.p[x].out```
 
 
 
