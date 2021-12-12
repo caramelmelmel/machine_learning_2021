@@ -2,21 +2,6 @@ import os
 
 ## Contains utilities (data reading, counting, data writing) shared by all of the parts.
 
-## TODO: see if we still need, if not we can delete
-#Outputs list (size n) of list (size 2) in this form: ['word', 'label']
-def read_data(path):
-  dataset = []
-  f = open(path,"r", encoding="utf-8")
-  training_set = f.readlines()
-  for line in training_set:
-    content_line = line.split() #split into the "text" and the "tag/label" using line.split()
-    dataset.append(content_line) #append to the ES dataset
-  #Remove empty lists within list
-  Edataset = [ele for ele in dataset if ele != []]
-  return Edataset
-
-# e(x|y) = Count(y -> x)/Count(y)
-
 ## TODO: rename to read_train?
 # FOR TRANSMISSION EDITED
 # Used to read all training sets that are of form ['word' label']
@@ -39,17 +24,6 @@ def read_data_transmission(path):
   #Remove empty lists within list
   Edataset = [ele for ele in dataset]
   return Edataset
-
-## TODO: see if we still need, if not we can delete
-# Count(y)
-# Output: dictionary of form {'label', 'count of this label in the dataset'}
-def count_tags(training_set):
-  unique_tag_count = {'O':0,'B-positive':0,'B-neutral':0,'B-negative':0,'I-positive':0,'I-neutral':0,'I-negative':0}
-  #to store the unique tag + the total count of each from the training dataset
-  for data_pair in training_set:
-    if data_pair[1] in unique_tag_count.keys():
-      unique_tag_count[data_pair[1]] += 1
-  return unique_tag_count
 
 ## TODO: rename to count_tags?
 # COUNT TAGS TRANSMISSION
@@ -82,18 +56,6 @@ def count_tag_words(training_set):
       except KeyError:
         print("error", KeyError, data)
   return label_generate_all
-
-## TODO: delete?
-# Output: dictionary of
-def estimate_transmission_parameters(count_tags, count_tag_words):
-  all_estimations = {} #dictionary
-  for unique_tag_tuple in count_tag_words.items():
-    single_tag_estimation = {} #dictionary
-    for word_count in unique_tag_tuple[1].items():
-      estimated_value = word_count[1]/count_tags[unique_tag_tuple[0]] #this is the label y count
-      single_tag_estimation[word_count[0]] = estimated_value
-    all_estimations[unique_tag_tuple[0]] = single_tag_estimation
-  return all_estimations
 
 #pass in the file name as the string
 def read_universal(file_name):
