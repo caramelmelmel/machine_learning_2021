@@ -204,7 +204,6 @@ def viterbi(data, t_params, e_params, word_set):
         if len(max_labels)>5: #IF MORE THAN 5 ENTRIES IN MAX LABELS THEN CHOP OFF
             max_labels = max_labels[5:] #chop off until 5 elements remain, DELETE ALL AFTER INDEX 5
     print(max_labels)
-    quit()
 
     # print('best v is', max_label, 'with prob', maximum)
     if maximum != n_inf:
@@ -213,10 +212,12 @@ def viterbi(data, t_params, e_params, word_set):
         for i in range(len(max_labels)):
             cache[n+1]['STOP'][1][i] = max_labels[i] #append 1st, 2nd, 3rd, 4th, 5th based on the i indexes
         #print(max_labels)
-    print(cache[n+1])
+    print(cache[n+1]['STOP'])
     # for i in range(len(cache)):
     #     print(i, cache[i])
     # print('\n')
+
+    # CHANGE -INF TO A VERY LARGE NEGATIVE NUMBER
     
     # EDIT: FINDING THE TOP 5 MOST PROBABLY LABELS
     # Finding the most probable labels, use a list where each of them stores TOP 5 VALUES
