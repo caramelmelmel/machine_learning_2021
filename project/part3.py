@@ -105,15 +105,15 @@ def viterbi(data, t_params, e_params, word_set):
 
     # DIFFERENT APPROACH
     n_inf = -math.inf
-    cache = [{'START':[n_inf, [None,None,None,None,None]],
-    'STOP': [n_inf, [None,None,None,None,None]], 
-    'O':[n_inf, [None,None,None,None,None]],
-    'B-positive':[n_inf, [None,None,None,None,None]],
-    'B-neutral':[n_inf, [None,None,None,None,None]],
-    'B-negative':[n_inf, [None,None,None,None,None]],
-    'I-positive':[n_inf, [None,None,None,None,None]],
-    'I-neutral':[n_inf, [None,None,None,None,None]],
-    'I-negative':[n_inf, [None,None,None,None,None]]} for i in range(n+2)]
+    cache = [{'START':[n_inf, None],
+    'STOP': [n_inf, None], 
+    'O':[n_inf, None],
+    'B-positive':[n_inf, None],
+    'B-neutral':[n_inf, None],
+    'B-negative':[n_inf, None],
+    'I-positive':[n_inf, None],
+    'I-neutral':[n_inf, None],
+    'I-negative':[n_inf, None]} for i in range(n+2)]
 
     cache[0]['START'][0] = 0 # Technically this should be 0
 
@@ -123,14 +123,19 @@ def viterbi(data, t_params, e_params, word_set):
     #quit()
 
 # USE ANOTHER APPROACH KEEP A LIST OF 5 PARENTS IN EACH OF THE 
+    #use a global list/heap to store all possible VITERBI scores for all the paths
+    # global list of sequences, sequence score and keep all the parents up to that state # Separate List
+    # Sequence will be START all the labels and then STOP
+    all_viterbi_list = [
+        [n_inf,['START']]
+    ] #its the VITERBI score followed by the SEQUENCE/PATH
+    # uses a sorted list, every time we got something append to the maximum list, sort it, then cut it to 5 
 
     for j in range(0, n):
         next_word = data[j]
         # print("\n\n Step", j+1, "current word is:", next_word)
         # Iterate over all of the current labels in this step.
         for u in labels:
-            max_labels =[] #for each STATE thEre is a list of top 5 POSSIBLE STATES, EDIT
-
             # print("\n Checking u: ", u)
             maximum = n_inf
             max_label = None #store 5 max labels
@@ -158,86 +163,73 @@ def viterbi(data, t_params, e_params, word_set):
                 if maximum < prob: #IF THE MAX IS SMALLER and max labels still has 5 slots to fill
                     maximum = prob 
                     max_label = v
-                # ADD ENTRY TO LIST O
-                max_labels.append((max_label, prob))
+                
+                # Adding prob, sequence to the global viterbi list
+                sequence = all_viterbi_list[0][1]
+                if len(sequence) == j+1: # J = 0 is step 1, where in step 1 the sequence will only include START, length 1
+                    sequence.append(u) # 'O', 'u'
+                elif len(sequence) > j+1:
+                    sequence[-1] = u
+                else:
+                    raise Exception("The sequence length is too short")
+
+                all_viterbi_list.append([prob, sequence])
 
                 # reorder and strip off the ends:
                 # https://www.geeksforgeeks.org/python-program-to-sort-a-list-of-tuples-by-second-item/
-                max_labels.sort(key = lambda x: x[1]) #sort based on probability values
-                if len(max_labels)>5: #IF MORE THAN 5 ENTRIES IN MAX LABELS THEN CHOP OFF
-                    max_labels = max_labels[5:] #chop off until 5 elements remain, DELETE ALL AFTER INDEX 5
+                all_viterbi_list.sort(key = lambda x: float(x[0]),reverse=True) #sort based on probability values
+                if len(all_viterbi_list)>5: #IF MORE THAN 5 ENTRIES IN MAX LABELS THEN CHOP OFF
+                    all_viterbi_list = all_viterbi_list[:5] #chop off until 5 elements remain, DELETE ALL AFTER INDEX 5
                 #print(max_labels)
 
             # print('best v is', max_label, 'with prob', maximum)
             if maximum == n_inf:
-                continue # DO NOTHING
-            cache[j+1][u][0] = maximum #SET THE CACHE ENTRY TO MAXIMUM PROBABILITY
-            #print(len(max_labels))
-            for i in range(len(max_labels)):
-                cache[j+1][u][1][i] = max_labels[i] #append 1st, 2nd, 3rd, 4th, 5th based on the i indexes
-            #print(max_labels)
-        #print(cache[j]) #edit
-        #quit()
-    print(len(cache))
+                continue
+            cache[j+1][u][0] = maximum
+            cache[j+1][u][1] = max_label
+    # print(len(cache))
 
     # Final Step (n+1)
-    max_labels =[]
     maximum = n_inf
-    # EDIT
     max_label = None
     for v in labels:
         prev_cached_value = cache[n][v][0]
-        print(cache[n][v][0]) #the MAX value(index 0)
+        # print(cache[n][v][0]) #the MAX value(index 0)
         transmission_prob = t_params[v]['STOP']
-        print(t_params[v]['STOP'])
+        # print(t_params[v]['STOP'])
         if (prev_cached_value == 0 or transmission_prob == 0):
             continue
         prob = prev_cached_value + math.log(transmission_prob)
-        print(prob)
+        # print(prob)
         if maximum < prob:
             maximum = prob
             max_label = v
-        max_labels.append((max_label, prob)) #append to MAX LABELS list
 
-        # TOP 5 LIST
-        max_labels.sort(key = lambda x: x[1]) #sort based on probability values from LARGEST to SMALLEST
-        if len(max_labels)>5: #IF MORE THAN 5 ENTRIES IN MAX LABELS THEN CHOP OFF
-            max_labels = max_labels[5:] #chop off until 5 elements remain, DELETE ALL AFTER INDEX 5
-    print(max_labels)
+        # AT LAST STEP THE SEQUENCE WILL HAVE LENGTH OF N + 2
+        # WE ONLY APPEND IF THE SEQUENCE IS ONE LESS THAN THE MAXIMUM
+        print("n", n)
+        sequence = all_viterbi_list[0][1]
+        # just append Os until you reach the LENGTH
+        if len(sequence) == n+2: # J = 0 is step 1, where in step 1 the sequence will only include START, length 1
+            sequence.append('STOP') # 'O', 'u'
+        elif len(sequence) > n+2:
+            sequence[-1] = 'STOP'
+        else: #ONLY FOR THIS CASE - NEED TO EXTEND ALL BEST SEQUENCES
+            sequence = sequence + ['O']*(n+1 - len(sequence)) + ["STOP"] #add Os until it reach the length and ensure the last thing is STOP
+            print("seqlen", len(sequence))
 
-    # print('best v is', max_label, 'with prob', maximum)
-    if maximum != n_inf:
-        cache[n+1]['STOP'][0] = maximum #SET THE CACHE ENTRY TO MAXIMUM PROBABILITY
-        #print(len(max_labels))
-        for i in range(len(max_labels)):
-            cache[n+1]['STOP'][1][i] = max_labels[i] #append 1st, 2nd, 3rd, 4th, 5th based on the i indexes
-        #print(max_labels)
-    print(cache[n+1]['STOP'])
-    # for i in range(len(cache)):
-    #     print(i, cache[i])
-    # print('\n')
+        all_viterbi_list.append([prob, sequence])
 
-    # CHANGE -INF TO A VERY LARGE NEGATIVE NUMBER
+        all_viterbi_list.sort(key = lambda x: float(x[0]),reverse=True) #sort based on probability values
+        if len(all_viterbi_list)>5: #IF MORE THAN 5 ENTRIES IN MAX LABELS THEN CHOP OFF
+            all_viterbi_list = all_viterbi_list[:5]
+        # print(all_viterbi_list)
+        
+    output = all_viterbi_list[4][1]
+    if len(output) < n+2:
+        output = output + ['O']*(n+1 - len(output)) + ["STOP"]
     
-    # EDIT: FINDING THE TOP 5 MOST PROBABLY LABELS
-    # Finding the most probable labels, use a list where each of them stores TOP 5 VALUES
-    output = [['','','','',''] for i in range(n)] #TOP 5 MOST PROBABE SEQUENCES
-    # Default to "O" if emission isn't possible.
-    for i in range(len(max_labels)): #use max labels list instead of a single max label
-        if max_labels[i] == None:
-            max_labels[i] = "O"
-    print(max_labels)
-    # for the n-1th to 1st word
-    for j in range(n+1, 1, -1):
-        for i in range(len(max_labels)):
-            # print("step", j, "old max:", max_label, "in cache:", cache[j])
-            # PROBLEM BACKTRACKING IF THERE IS A NONE ENTRY
-
-            max_labels[i] = cache[j][max_labels[i][0]][1] #the CHOSEN LABEL
-            if max_labels[i] == None:
-                max_labels[i] = "O"
-            output[j-2][i] = max_labels[i]
-    return output
+    return output[1:-1] #access the 5TH BEST sequence
 
 def viterbi_loop(separated, t_params, e_params, word_set):
     final = []
@@ -279,19 +271,15 @@ e_params = estimate_emission_parameters_with_unk(tags, tag_words)
 # ru_train = utilities.read_data_transmission(r"RU\train")
 
 # # Testing viterbi
-# test = ['Con', 'lo', 'cual', 'en', 'el', 'comedor', 'tienes', 'que', 'levantar', 'mas', 'la', 'voz', 
-# 'para', 'oirte', 'y', 'se', 'forma', 'un', 'ambiente', 'que', 'no', 'lo', 'que', 'se', 'espera', 'de', 'una', 'estrella', 'michelin', '.']
-# output_sequence = viterbi(test, t_params, e_params, train_words)
-# # print('\n')
-# # print("ogiginal length", len(test))
-# # print('\n')
-# # print(test)
-# # print("output length", len(output_sequence))
-# print('\n')
-# print(output_sequence)
-
+test = ['Con', 'lo', 'cual', 'en', 'el', 'comedor', 'tienes', 'que', 'levantar', 'mas', 'la', 'voz', 
+'para', 'oirte', 'y', 'se', 'forma', 'un', 'ambiente', 'que', 'no', 'lo', 'que', 'se', 'espera', 'de', 'una', 'estrella', 'michelin', '.']
+output_sequence = viterbi(test, t_params, e_params, train_words)
+print('\n')
+print(output_sequence)
+print(len(test))
+print(len(output_sequence))
 ## Actual viterbi
-prediction = viterbi_loop(es_dev, t_params, e_params, train_words)
+# prediction = viterbi_loop(es_dev, t_params, e_params, train_words)
 
 ## Output into dev.out
-output_prediction(prediction, es_dev, r"ES\dev.p2.out")
+# output_prediction(prediction, es_dev, r"ES\dev.p2.out")
