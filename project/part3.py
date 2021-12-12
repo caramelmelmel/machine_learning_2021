@@ -217,15 +217,15 @@ def viterbi(data, t_params, e_params, word_set):
     # Finding the most probable labels, use a list where each of them stores TOP 5 VALUES
     output = [['','','','',''] for i in range(n)] #TOP 5 MOST PROBABE SEQUENCES
     # Default to "O" if emission isn't possible.
-    for i in range(5): #use max labels list instead of a single max label
+    for i in range(len(max_labels)): #use max labels list instead of a single max label
         if max_labels[i] == None:
             max_labels[i] = "O"
 
     # for the n-1th to 1st word
     for j in range(n+1, 1, -1):
-        for i in range(5):
+        for i in range(len(max_labels)):
             # print("step", j, "old max:", max_label, "in cache:", cache[j])
-            max_labels[i] = cache[j][max_labels[i]][1]
+            max_labels[i] = cache[j][max_labels[i][0]][1] #the CHOSEN LABEL
             if max_labels[i] == None:
                 max_labels[i] = "O"
             output[j-2][i] = max_labels[i]
