@@ -175,10 +175,10 @@ def viterbi(data, t_params, e_params, word_set):
             #print(len(max_labels))
             for i in range(len(max_labels)):
                 cache[j+1][u][1][i] = max_labels[i] #append 1st, 2nd, 3rd, 4th, 5th based on the i indexes
-            print(max_labels)
-        print(cache[j]) #edit
+            #print(max_labels)
+        #print(cache[j]) #edit
         #quit()
-    #print(cache[k])
+    print(len(cache))
 
     # Final Step (n+1)
     max_labels =[]
@@ -187,10 +187,13 @@ def viterbi(data, t_params, e_params, word_set):
     max_label = None
     for v in labels:
         prev_cached_value = cache[n][v][0]
+        print(cache[n][v][0]) #the MAX value(index 0)
         transmission_prob = t_params[v]['STOP']
+        print(t_params[v]['STOP'])
         if (prev_cached_value == 0 or transmission_prob == 0):
             continue
         prob = prev_cached_value + math.log(transmission_prob)
+        print(prob)
         if maximum < prob:
             maximum = prob
             max_label = v
@@ -200,6 +203,8 @@ def viterbi(data, t_params, e_params, word_set):
         max_labels.sort(key = lambda x: x[1]) #sort based on probability values from LARGEST to SMALLEST
         if len(max_labels)>5: #IF MORE THAN 5 ENTRIES IN MAX LABELS THEN CHOP OFF
             max_labels = max_labels[5:] #chop off until 5 elements remain, DELETE ALL AFTER INDEX 5
+    print(max_labels)
+    quit()
 
     # print('best v is', max_label, 'with prob', maximum)
     if maximum != n_inf:
@@ -207,8 +212,8 @@ def viterbi(data, t_params, e_params, word_set):
         #print(len(max_labels))
         for i in range(len(max_labels)):
             cache[n+1]['STOP'][1][i] = max_labels[i] #append 1st, 2nd, 3rd, 4th, 5th based on the i indexes
-        print(max_labels)
-
+        #print(max_labels)
+    print(cache[n+1])
     # for i in range(len(cache)):
     #     print(i, cache[i])
     # print('\n')
@@ -220,11 +225,13 @@ def viterbi(data, t_params, e_params, word_set):
     for i in range(len(max_labels)): #use max labels list instead of a single max label
         if max_labels[i] == None:
             max_labels[i] = "O"
-
+    print(max_labels)
     # for the n-1th to 1st word
     for j in range(n+1, 1, -1):
         for i in range(len(max_labels)):
             # print("step", j, "old max:", max_label, "in cache:", cache[j])
+            # PROBLEM BACKTRACKING IF THERE IS A NONE ENTRY
+
             max_labels[i] = cache[j][max_labels[i][0]][1] #the CHOSEN LABEL
             if max_labels[i] == None:
                 max_labels[i] = "O"
