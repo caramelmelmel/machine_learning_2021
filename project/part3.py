@@ -89,12 +89,8 @@ def viterbi(data, t_params, e_params, word_set):
     #IMPORTANT
     # each possible label maps to a list of format [probability up to this point, parent label]
     # 0: START 1: 1st word ... n: nth word n+1: END --> size = n+2
-
+    """
     n_inf = -math.inf
-    n_inf2 = -math.inf
-    n_inf3 = -math.inf
-    n_inf4 = -math.inf
-    n_inf5 = -math.inf
     cache = [[{'START':[n_inf, None], #store 1st, 2nd, 3rd, 4th, 5th maximum path
     'STOP': [n_inf, None], 
     'O':[n_inf, None],
@@ -105,68 +101,85 @@ def viterbi(data, t_params, e_params, word_set):
     'I-neutral':[n_inf, None],
     'I-negative':[n_inf, None]} for i in range(n+2)]
     for i in range(5)]
+    """
 
-    for i in range(0,5,1):
-        cache[i][0]['START'][0] = 0 # Technically this should be 0
+    # DIFFERENT APPROACH
+    n_inf = -math.inf
+    cache = [{'START':[n_inf, [None,None,None,None,None]],
+    'STOP': [n_inf, [None,None,None,None,None]], 
+    'O':[n_inf, [None,None,None,None,None]],
+    'B-positive':[n_inf, [None,None,None,None,None]],
+    'B-neutral':[n_inf, [None,None,None,None,None]],
+    'B-negative':[n_inf, [None,None,None,None,None]],
+    'I-positive':[n_inf, [None,None,None,None,None]],
+    'I-neutral':[n_inf, [None,None,None,None,None]],
+    'I-negative':[n_inf, [None,None,None,None,None]]} for i in range(n+2)]
+
+    cache[0]['START'][0] = 0 # Technically this should be 0
 
     #for i in range(5):
     #    print(i)
     #    print(cache)
     #quit()
-    
-    for k in range(5): #for each of the 1st, 2nd, 3rd CACHES
-        print("CACHE:",k)
-        for j in range(0, n):
-            next_word = data[j]
-            # print("\n\n Step", j+1, "current word is:", next_word)
-            # Iterate over all of the current labels in this step.
-            max_labels =[]
-            for u in labels:
-                # print("\n Checking u: ", u)
-                maximum = n_inf
-                max_label = None #store 5 max labels
-                # Because we want to find the maximum v
-                for v in labels:
-                    # If any of the observed probabilities are 0, we should skip because that is an impossible path
-                    if (cache[k][j][v][0] == n_inf or t_params[v][u] == 0):
-                        # print(v, "to", u, "is impossible")
-                        continue
-                    prev_cached_value = cache[k][j][v][0]
-                    if next_word in word_set:
-                        if next_word not in e_params[u].keys(): #if word is in training set and not in emission
-                            # print("impossible emission: word in training set yet not seen for this label.")
-                            continue
-                        else:
-                            emission_prob = e_params[u][next_word]
-                    else:
-                        # print("not in training set. using the #UNK# probability")
-                        emission_prob = e_params[u]['#UNK#']
-                    transmission_prob = t_params[v][u]
-                    # print("cache:", prev_cached_value, "emiss:", emission_prob, "trans:", transmission_prob)
-                    prob = prev_cached_value + math.log(emission_prob) + math.log(transmission_prob)
-                    # print(v, 'to', u, 'emitting', next_word, 'has prob', prob)
-                    if maximum < prob: #and max labels still has 5 slots to fill
-                        maximum = prob 
-                        max_label = v
-                    max_labels.append((max_label, prob))
 
-                    # reorder and strip off the ends:
-                    # https://www.geeksforgeeks.org/python-program-to-sort-a-list-of-tuples-by-second-item/
-                    max_labels.sort(key = lambda x: x[1]) #sort based on probability values
-                    if len(max_labels)>5:
-                        max_labels[0:5] #chop off until 5 elements remain
+# USE ANOTHER APPROACH KEEP A LIST OF 5 PARENTS IN EACH OF THE 
 
-                # print('best v is', max_label, 'with prob', maximum)
-                maximum = maximum #maximum score is max of max_labels
-                if maximum == n_inf:
+    for j in range(0, n):
+        next_word = data[j]
+        # print("\n\n Step", j+1, "current word is:", next_word)
+        # Iterate over all of the current labels in this step.
+        for u in labels:
+            max_labels =[] #for each STATE thEre is a list of top 5 POSSIBLE STATES, EDIT
+
+            # print("\n Checking u: ", u)
+            maximum = n_inf
+            max_label = None #store 5 max labels
+            # Because we want to find the maximum v
+            for v in labels: # FOR EACH OF THE PREVIOUS STATE/LABELS
+                # If any of the observed probabilities OF PREVIOUS STATE IS  0, we should skip because that is an impossible path
+                if (cache[j][v][0] == n_inf or t_params[v][u] == 0):
+                    # print(v, "to", u, "is impossible")
                     continue
-                """
-                cache[k][j+1][u][0] = maximum
-                cache[k][j+1][u][1] = max_labels[k] #append 1st, 2nd, 3rd, 4th, 5th based on the i indexes
-                """
-            print(max_labels) #edit
-        #print(cache[k])
-        break
+                prev_cached_value = cache[j][v][0]
+                if next_word in word_set:
+                    if next_word not in e_params[u].keys(): #if word is in training set and not in emission
+                        # print("impossible emission: word in training set yet not seen for this label.")
+                        continue
+                    else:
+                        emission_prob = e_params[u][next_word]
+                else:
+                    # print("not in training set. using the #UNK# probability")
+                    emission_prob = e_params[u]['#UNK#']
+                transmission_prob = t_params[v][u]
+                # print("cache:", prev_cached_value, "emiss:", emission_prob, "trans:", transmission_prob)
+                # COUNT PROBABILITY OF PREVIOUS CACHE CALC
+                prob = prev_cached_value + math.log(emission_prob) + math.log(transmission_prob)
+                # print(v, 'to', u, 'emitting', next_word, 'has prob', prob)
+                if maximum < prob: #IF THE MAX IS SMALLER and max labels still has 5 slots to fill
+                    maximum = prob 
+                    max_label = v
+                # ADD ENTRY TO LIST O
+                max_labels.append((max_label, prob))
+
+                # reorder and strip off the ends:
+                # https://www.geeksforgeeks.org/python-program-to-sort-a-list-of-tuples-by-second-item/
+                max_labels.sort(key = lambda x: x[1]) #sort based on probability values
+                if len(max_labels)>5: #IF MORE THAN 5 ENTRIES IN MAX LABELS THEN CHOP OFF
+                    max_labels = max_labels[5:] #chop off until 5 elements remain, DELETE ALL AFTER INDEX 5
+                #print(max_labels)
+
+            # print('best v is', max_label, 'with prob', maximum)
+            if maximum == n_inf:
+                continue # DO NOTHING
+            cache[j+1][u][0] = maximum #SET THE CACHE ENTRY TO MAXIMUM PROBABILITY
+            #print(len(max_labels))
+            for i in range(len(max_labels)):
+                cache[j+1][u][1][i] = max_labels[i] #append 1st, 2nd, 3rd, 4th, 5th based on the i indexes
+            print(max_labels)
+        print(cache[j]) #edit
+        #quit()
+    #print(cache[k])
+    
     
 
     """
