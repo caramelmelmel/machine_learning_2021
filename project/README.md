@@ -1,10 +1,11 @@
 # 50.007 Machine Learning Project 2021
 
 ## Dependencies needed to install
-It is highly suggested to create a pipenvironment to run all the files as it is not very desirable to 'contaminate' your system. Run it on python 3.8 + and all should go fine.
+It is highly suggested to create a pip environment to run all the files as it is not very desirable to 'contaminate' your system. Run it on python 3.7 + and all should go fine.
 
 ## Running our scripts
-Change directory to the folder. You can do it via any operating system specified below:
+Change directory to the folder. You can do it via any operating system specified below. <br/>
+Note: If you are running Windows, use ```python``` instead of ```python3``` for each command specified below.
 
 1. First alternative:<br/>
  Via powershell or git bash (Windows) or Mac/Linux:
@@ -16,10 +17,12 @@ Change directory to the folder. You can do it via any operating system specified
 2. Second Alternative (submitted files): <br/>
 ```cd ${PWD}/project```
 
-### Part 1
-a. Training and Predicting (Test):
-```python3 part1.py```
-You should receive the outputs in the `ES/dev.p1.out` file and also that in the `RU/dev.p1.out`.
+### Part 1 (Sentiment Analysis using Emission Parameters)
+a. Training and Predicting (Test): <br/>
+```python3 part1.py```<br/>
+You should receive the outputs in the `ES/dev.p1.out` file and also that in the `RU/dev.p1.out`. <br/>
+You may also supply a custom training, test, and output file path by adding arguments: <br/>
+```python3 part1.py [train_path] [test_path] [output_path]```
 
 b. Evaluating result
 
@@ -27,20 +30,22 @@ For the Russian dataset:<br/>
 For MacOS/Linux/ Powershell:<br/>
 ```python3 EvalScript/EvalScript.py RU/dev.out RU/dev.p1.out```
 
-For Command Prompt(Windows):
+For Command Prompt(Windows):<br/>
 ```python EvalScript/EvalScript.py RU/dev.out RU/dev.p1.out```
 
 For the Spanish dataset:<br/>
 For MacOS/Linux/ Powershell:<br/>
 ```python3 EvalScript/EvalScript.py ES/dev.out ES/dev.p1.out```
 
-For Command Prompt (Windows):
-```python3 EvalScript/EvalScript.py ES/dev.out ES/dev.p1.out```
+For Command Prompt (Windows): <br/>
+```python EvalScript/EvalScript.py ES/dev.out ES/dev.p1.out```
 
-### Part 2
-Training and Predicting (Test):
+### Part 2 (Viterbi, using Emission and Transmission Parameters)
+a. Training and Predicting (Test): <br/>
 ```python3 part2.py```
-You should receive the outputs in the `ES/dev.p2.out` file and also that in the `RU/dev.p2.out`.
+You should receive the outputs in the `ES/dev.p2.out` file and also that in the `RU/dev.p2.out`. <br/>
+You may also supply a custom training, test, and output file path by adding arguments: <br/>
+```python3 part2.py [train_path] [test_path] [output_path]```
 
 b. Evaluating result
 
@@ -48,14 +53,14 @@ For the Russian dataset:<br/>
 For MacOS/Linux/ Powershell:<br/>
 ```python3 EvalScript/EvalScript.py RU/dev.out RU/dev.p2.out```
 
-For Command Prompt(Windows):
+For Command Prompt(Windows):<br/>
 ```python EvalScript/EvalScript.py RU/dev.out RU/dev.p2.out```
 
 For the Spanish dataset:
 For MacOS/Linux/ Powershell:<br/>
 ```python3 EvalScript/EvalScript.py ES/dev.out ES/dev.p2.out```
 
-For Command Prompt:
+For Command Prompt:<br/>
 ```python EvalScript/EvalScript.py ES/dev.out ES/dev.p2.out```
 
 
