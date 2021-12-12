@@ -1,5 +1,7 @@
 import utilities
 
+# Estimates emission parameters using MLE.
+# Adds an #UNK# token for use when we encounter a word in the test set that is not in our training set.
 def estimate_emission_parameters_with_unk(count_tags, count_tag_words,k=1):
   all_estimations = {} #dictionary
   for unique_tag_tuple in count_tag_words.items():
@@ -11,6 +13,7 @@ def estimate_emission_parameters_with_unk(count_tags, count_tag_words,k=1):
     all_estimations[unique_tag_tuple[0]] = single_tag_estimation
   return all_estimations
 
+# Simple sentiment analysis system on a sentence.
 def predict_using_emission(words, e_params, word_set):
     labels = ['O', 'B-positive', 'B-neutral', 'B-negative', 'I-positive', 'I-neutral', 'I-negative']
     out = []
@@ -31,12 +34,14 @@ def predict_using_emission(words, e_params, word_set):
         out.append(max_label)
     return out
 
+# Runs the sentence on each word in our dataset.
 def prediction_loop(separated, e_params, word_set):
     final = []
     for doc in separated:
         final.append(predict_using_emission(doc, e_params, word_set))
     return final
-        
+
+# Wrapper function that trains the emission parameters and runs the predictor on the
 def run_emission_prediction(training_path, test_path, output_path):
     train = utilities.read_data_transmission(training_path)
     train_words = utilities.get_training_set_words(train)
@@ -47,5 +52,6 @@ def run_emission_prediction(training_path, test_path, output_path):
     prediction = prediction_loop(test, e_params, train_words)
     utilities.output_prediction(prediction, test, output_path)
 
-run_emission_prediction(r"ES/train", r"ES/dev.in", r"ES/dev.p1.out")
-run_emission_prediction(r"RU/train", r"RU/dev.in", r"RU/dev.p1.out")
+if __name__ == '__main__':
+    run_emission_prediction(r"ES/train", r"ES/dev.in", r"ES/dev.p1.out")
+    run_emission_prediction(r"RU/train", r"RU/dev.in", r"RU/dev.p1.out")

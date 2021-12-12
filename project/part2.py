@@ -174,5 +174,6 @@ def run_viterbi(training_path, test_path, output_path):
 # print(output_sequence)
 
 ## Actual viterbi calls
-run_viterbi(r"ES/train", r"ES/dev.in", r"ES/dev.p2.out")
-run_viterbi(r"RU/train", r"RU/dev.in", r"RU/dev.p2.out")
+if __name__ == '__main__':
+    run_viterbi(r"ES/train", r"ES/dev.in", r"ES/dev.p2.out")
+    run_viterbi(r"RU/train", r"RU/dev.in", r"RU/dev.p2.out")
