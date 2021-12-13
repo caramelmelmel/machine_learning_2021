@@ -83,11 +83,10 @@ def get_symbols(edataset): #to get all of the symbols
 
 # Russian Stopwords
 # Remove symbols as well, using the stopwords method
-# Spanish Stopwords, strip from the dataset????
+# Spanish Stopwords, strip from the dataset
 # Not suitable for this use case since we are removing entries from the dev.in and dev.out
 # https://github.com/stopwords-iso/stopwords-es
 # https://www.ranks.nl/stopwords/spanish
-# Use a different algorithm, perhaps Naive Bayes Algorithm
 
 # Remove Stopwords
 def smooth_labels_transmission(transmission_parameters,alpha_sm=0.01):
