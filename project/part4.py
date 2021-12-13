@@ -168,6 +168,10 @@ if __name__ == "__main__":
             print("usage: python part4.py [train_path] [test_path] [output_path]")
     
     #evaluation portion
-    stream = os.system('python3 EvalScript/evalResult.py RU/dev.out RU/dev.p4.out')
+        #evaluation portion
+    print('The scores for the russian dataset is:')
+    os.system('python3 EvalScript/evalResult.py RU/dev.out RU/dev.p4.out')
+    print('The scores for the ES dataset is:')
+    os.system('python3 EvalScript/evalResult.py ES/dev.out ES/dev.p4.out')
 
     
