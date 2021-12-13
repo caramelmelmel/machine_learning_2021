@@ -1,7 +1,35 @@
-#Improved sentiment analysis model
+from copy_utilities import read_universal_
 import utilities
-import string
 import part2
+import part1
+import os 
+import numpy as np
+import sys
+
+#import all file paths
+#common words are stop words for each language
+STOP_words_ES_file_path = read_universal_('stopwords_ES.txt','ES')
+STOP_words_RU_file_path = read_universal_('stopwords_RU.txt','RU')
+
+#training path 
+RU_train = read_universal_('train','RU')
+ES_train = read_universal_('train','ES')
+
+# test file path dev set
+RU_test_dev = read_universal_('dev.in','RU')
+ES_test_dev = read_universal_('dev.in','RU')
+
+# write out file path (for dev ones)
+RU_test_dev_write = read_universal_('dev.p4.out','RU')
+ES_test_dev_write = read_universal_('dev.p4.out','ES')
+
+#write for test set portion 2 
+RU_test = read_universal_('test.in','test/RU-test')
+ES_test = read_universal_('test.in','test/ES-test')
+
+# write for the test portion
+RU_test_write = read_universal_('test.p4.out','RU')
+ES_test_write = read_universal_('test.p4.out','ES')
 
 # Generate a list of stopwords
 # Use lemmization
@@ -19,25 +47,26 @@ def read_stopwords(stopwords_path):
     stop_words = [ele for ele in stopwords_list if ele != []]
     return stop_words
 
-def remove_stopwords_es(dataset_spanyol, stop_words_list, symbols_list=[]): #input the spanish dataset here, default empty symbols
-  original_dataset = []
-  f = open(dataset_spanyol,"r", encoding="utf-8")
-  training_set = f.readlines()
-  for line in training_set:
-    # if to include \n
-    if len(line) == 1:
-      original_dataset.append("\n")
-    else:
-      content_line = line.split() #split into the "text" and the "tag/label" using line.split()
-      if content_line[0] in stop_words_list: #if the word belongs to the list of stopwords or list of symbols, assign the label O
-          content_line[1] = "O" #assign label O
-          original_dataset.append(content_line) #append to the ES dataset
-      elif content_line[0] in symbols_list:
-          continue
-          #print(content_line[0])
-  #Remove empty lists within list
-  Edataset = [ele for ele in original_dataset]
-  return Edataset
+#remove all the russian and spanish stopwords
+def remove_stopwords(dataset,stop_words,symbols_list=[]):
+    original_dataset = []
+    file_dataset = open(dataset,'r',encoding='utf-8')
+    training_set = file_dataset.readlines()
+    for line in training_set:
+        # if to include \n
+        if len(line) == 1:
+            original_dataset.append("\n")
+        else:
+            content_line = line.split() #split into the "text" and the "tag/label" using line.split()
+            if content_line[0] in stop_words: #if the word belongs to the list of stopwords or list of symbols, assign the label O
+                content_line[1] = "O" #assign label O
+                original_dataset.append(content_line) #append to the ES dataset
+            elif content_line[0] in symbols_list:
+                continue
+                #print(content_line[0])
+        #Remove empty lists within list
+    Edataset = [ele for ele in original_dataset]
+    return Edataset
 
 def get_symbols(edataset): #to get all of the symbols
     symbol_set=[]
@@ -59,60 +88,9 @@ def get_symbols(edataset): #to get all of the symbols
 # Use a different algorithm, perhaps Naive Bayes Algorithm
 
 # Remove Stopwords
-"""
-stopwordsES = read_stopwords("stopwords_ES.txt")
-
-modif = remove_stopwords_es(r"ES\train",stopwordsES) #remove all stopwords
-print(modif)
-
-tags = utilities.count_tags(modif)
-print(sum(tags.values()))
-"""
-
-es_train = utilities.read_data(r"ES\train")
-tags = utilities.count_tags(es_train)
-tag_words = utilities.count_tag_words(es_train)
-transmission_counts = part2.count_transmissions(es_train)
-#print(transmission_counts)
-t_params = part2.estimate_transmission_parameters(transmission_counts, tags)
-print(t_params)
-#e_params = estimate_emission_parameters_with_unk(tags, tag_words)
-print("=======================")
-
-stopwordsRU = read_stopwords("stopwords_RU.txt")
-modif_RU = remove_stopwords_es(r"RU\train",stopwordsRU)
-tags_ru = utilities.count_tags(modif_RU)
-print(modif_RU)
-print(get_symbols(modif_RU))
-#print(string.printable)
-#print(tags_ru)
-#print(stopwordsRU)
-# Label Smoothing
-# Smooth Transmission Parameters
-# Instead of using hard probabilities, reduce a bit by a small probability which is 1/all the possible transmission
-# Allocate that same amount for the rest of the possible transmission
-# Instead of using hard labels, use soft labels, increase the probability of the incorrect classes by a very small amount, decrease the probability of the correct class by that very small amount
-# Multi-class classification problem
-# For each Label theres a dictionary which shows the next state, input is this dictionary, some way to format into a list of probabilities
-# so multiply everything by 1 - smoothing factor, add everything by smoothing/divided by the number of labels
-# Smooth the very high probability
-# Apply for emission as well - a bit more even out?????
-# how to determine the smoothing factor, test different values = 0.1, 0.05, 0.01, Hyperparameters, hyperparameter tuning applying what we learn in ML
-# Idea of smoothing
-"""
-def smooth_labels(labels, factor=0.1):
-	# smooth the labels
-	labels *= (1 - factor)
-	labels += (factor / labels.shape[1])
-	# returned the smoothed labels
-	return labels
-"""
-# Label Smoothing
-# https://www.pyimagesearch.com/2019/12/30/label-smoothing-with-keras-tensorflow-and-deep-learning/
-#may need to modify for PART IV, also different cases for start/stop possibly
-def smooth_labels_transmission(transmission_parameters):
+def smooth_labels_transmission(transmission_parameters,alpha_sm=0.01):
     smoothed_dict = transmission_parameters
-    alpha_sm = 0.1 #hyperparameter for label smoothing, default 0.1
+    #alpha_sm = 0.1 #hyperparameter for label smoothing, default 0.1
     for entry in smoothed_dict: #for each dictionary
         for label in smoothed_dict[entry]: #for each label in each dictionary
             if label != 'START':
@@ -121,56 +99,75 @@ def smooth_labels_transmission(transmission_parameters):
             # there is no transition to START at all
     return smoothed_dict #return smoothed dictionary
 
-print(smooth_labels_transmission(t_params))
+def smooth_labels(labels, factor=0.1):
+	# smooth the labels
+	labels *= (1 - factor)
+	labels += (factor / labels.shape[1])
+	# returned the smoothed labels
+	return labels
 
-def smooth_labels_emission(emission_parameters):
-    smoothed_dict = emission_parameters
-    alpha_sm = 0.1 #hyperparameter for label smoothing, default 0.1
-    for entry in smoothed_dict:
+def smooth_labels_emission(emission_dict,alpha_sm=0.01):
+    smoothed_dict = emission_dict
+    for label, word_prob_dict in emission_dict.items():
+        for word in word_prob_dict.keys():
+            smoothed_dict[label][word] *= (1 - alpha_sm)
+            smoothed_dict[label][word] += (alpha_sm/(len(word_prob_dict)))
+    return smoothed_dict
 
 
-"""
-# https://github.com/ongkahyuan/ML-project/blob/main/part5.py
-# Smoothing Emission Parameters (EDIT THIS) EDIT EDIT EDIT EDIT EDIT
-def set_emission_dict(self, emission_dict):
-        self.emission_dict = emission_dict
 
-def __smooth_emission_params(self):
-        generates emission parameters based on training data, saves it as self.e_x_given_y
-        params_count = {}
-        unique_symbols = []
-        for key, value in self.emission_dict.items():
-            if key[0] not in unique_symbols:
-                unique_symbols.append(key[0])
-        
-        n = len(unique_symbols)
-        # n refers to the number of observations/symbols 
+def run_viterbi(training_path, test_path, output_path,alpha_sm=0.0):
+    train = utilities.read_data(training_path)
+    train_words = utilities.get_training_set_words(train)
+    test = utilities.read_dev(test_path)
+    tags = utilities.count_tags(train)
+    tag_words = utilities.count_tag_words(train)
+    """
+    transmission_counts = part2.count_transmissions(train)
+    t_params = part2.estimate_transmission_parameters(transmission_counts, tags)
+    t_params = smooth_labels_transmission(t_params,alpha_sm=alpha_sm)
+    e_params = part1.estimate_emission_parameters_with_unk(tags, tag_words)
+    e_params = smooth_labels_emission(e_params,alpha_sm=alpha_sm)
+    """
+    
+    transmission_counts = part2.count_transmissions(train)
+    t_params = part2.estimate_transmission_parameters(transmission_counts, tags)
+    t_params = smooth_labels_transmission(t_params,alpha_sm=alpha_sm)
+    e_params = part1.estimate_emission_parameters_with_unk(tags, tag_words)
+    e_params = smooth_labels_emission(e_params,alpha_sm=alpha_sm)
+    prediction = part2.viterbi_loop(test, t_params, e_params, train_words)
+    utilities.output_prediction(prediction, test, output_path)
 
-        for state in self.states:
-            params_count[state] = [0,0,0]
-            # print(params_count[state])
-            # key is the state, value is list [total no. of symbols, total no. of non-zero probability, probability p]
-            # i.e. [Ts, v, p]
-            for key, value in self.emission_dict.items():
-                if state in key:
-                    params_count[state][0] += 1
-                    if value != 0:
-                        params_count[state][1] += 1
-                    else:
-                        continue
-                    params_count[state][2] += 1/(params_count[state][0] + params_count[state][1])
-                # p = 1/(Ts+v)
-        
-        for state in self.states:
-            for key, value in self.emission_dict.items():
-                if state in key:
-                    if value != 0:
-                        self.emission_dict[key] = value - params_count[state][2]
-                    else:
-                        self.emission_dict[key] = (params_count[state][2]*params_count[state][2])/n-params_count[state][2]
-                        # v*p/n-v
+def run_everything(training_path, test_path, output_path):
+    run_viterbi(training_path,test_path,output_path)
+    
 
-def get_smooth_emission_params(self):
-        self.__smooth_emission_params()
-        return self.emission_dict
-"""
+
+if __name__ == "__main__":
+    n = len(sys.argv)
+    if os.path.exists(RU_test_dev_write):
+        os.remove(RU_test_dev_write)
+    if os.path.exists(RU_test_write):
+        os.remove(RU_test_write)
+    if os.path.exists(ES_test_dev_write):
+        os.remove(ES_test_dev_write)
+    if os.path.exists(ES_test_write):
+        os.remove(ES_test_write)
+
+    if n == 1:
+        #RU
+        run_everything(RU_train,RU_test_dev,RU_test_dev_write)
+        run_everything(RU_train,RU_test,RU_test_write)
+        #ES
+        run_everything(ES_train,ES_test_dev,ES_test_dev_write)
+        run_everything(ES_train,ES_test,ES_test_write)
+    else:
+        if n == 4:
+            run_everything(sys.argv[1], sys.argv[2], sys.argv[3])
+        else:
+            print("usage: python part4.py [train_path] [test_path] [output_path]")
+    
+    #evaluation portion
+    stream = os.system('python3 EvalScript/evalResult.py RU/dev.out RU/dev.p4.out')
+
+    
