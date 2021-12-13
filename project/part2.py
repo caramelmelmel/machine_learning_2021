@@ -2,6 +2,7 @@ import utilities
 import math
 import sys
 import part1
+import os
 
 ## This is code to obtain the transmission parameters
 
@@ -186,3 +187,11 @@ if __name__ == '__main__':
             run_viterbi(sys.argv[1], sys.argv[2], sys.argv[3])
         else:
             print("usage: python part2.py [train_path] [test_path] [output_path]")
+    python_cmd = "python3"
+    if os.name != "posix":
+        python_cmd = "python"
+    #evaluation portion
+    print('The scores for the russian dataset is:')
+    os.system(f'{python_cmd} EvalScript/evalResult.py RU/dev.out RU/dev.p2.out')
+    print('The scores for the ES dataset is:')
+    os.system(f'{python_cmd} EvalScript/evalResult.py ES/dev.out ES/dev.p2.out')

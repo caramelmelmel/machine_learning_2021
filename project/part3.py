@@ -7,6 +7,7 @@ import math
 import sys
 import part1
 import part2
+import os
 
 # Viterbi algorithm to predict output labels on each document.
 # Note: should be called on EACH DOCUMENT of the VALIDATION/TEST set (data is a list of list containing strings)
@@ -163,3 +164,11 @@ if __name__ == '__main__':
             run_viterbi_5th(sys.argv[1], sys.argv[2], sys.argv[3])
         else:
             print("usage: python part3.py [train_path] [test_path] [output_path]")
+    python_cmd = "python3"
+    if os.name != "posix":
+        python_cmd = "python"
+    #evaluation portion
+    print('The scores for the russian dataset is:')
+    os.system(f'{python_cmd} EvalScript/evalResult.py RU/dev.out RU/dev.p3.out')
+    print('The scores for the ES dataset is:')
+    os.system(f'{python_cmd} EvalScript/evalResult.py ES/dev.out ES/dev.p3.out')

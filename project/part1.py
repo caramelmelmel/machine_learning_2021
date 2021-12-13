@@ -1,5 +1,6 @@
 import utilities
 import sys
+import os
 
 # Estimates emission parameters using MLE.
 # Adds an #UNK# token for use when we encounter a word in the test set that is not in our training set.
@@ -64,3 +65,12 @@ if __name__ == '__main__':
             run_emission_prediction(sys.argv[1], sys.argv[2], sys.argv[3])
         else:
             print("usage: python part1.py [train_path] [test_path] [output_path]")
+            
+    python_cmd = "python3"
+    if os.name != "posix":
+        python_cmd = "python"
+    #evaluation portion
+    print('The scores for the russian dataset is:')
+    os.system(f'{python_cmd} EvalScript/evalResult.py RU/dev.out RU/dev.p1.out')
+    print('The scores for the ES dataset is:')
+    os.system(f'{python_cmd} EvalScript/evalResult.py ES/dev.out ES/dev.p1.out')
