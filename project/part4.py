@@ -17,7 +17,7 @@ ES_train = read_universal_('train','ES')
 
 # test file path dev set
 RU_test_dev = read_universal_('dev.in','RU')
-ES_test_dev = read_universal_('dev.in','RU')
+ES_test_dev = read_universal_('dev.in','ES')
 
 # write out file path (for dev ones)
 RU_test_dev_write = read_universal_('dev.p4.out','RU')
@@ -57,14 +57,16 @@ def remove_stopwords(dataset,stop_words,symbols_list=[]):
         if len(line) == 1:
             original_dataset.append("\n")
         else:
-            content_line = line.split() #split into the "text" and the "tag/label" using line.split()
-            if content_line[0] in stop_words: #if the word belongs to the list of stopwords or list of symbols, assign the label O
-                content_line[1] = "O" #assign label O
-                original_dataset.append(content_line) #append to the ES dataset
-            elif content_line[0] in symbols_list:
-                continue
-                #print(content_line[0])
-        #Remove empty lists within list
+            line = line.rstrip('\n') #split into the "text" and the "tag/label" using line.split()
+            line = line.rpartition(' ')
+            line = list(line)
+            del line[1]
+            if line != ['', '']:
+                if line[0] in stop_words: #if the word belongs to the list of stopwords or list of symbols, assign the label O
+                    line[1] = "O" #assign label O
+                elif line[0] in symbols_list:
+                    continue
+                original_dataset.append(line)
     Edataset = [ele for ele in original_dataset]
     return Edataset
 
@@ -81,11 +83,10 @@ def get_symbols(edataset): #to get all of the symbols
 
 # Russian Stopwords
 # Remove symbols as well, using the stopwords method
-# Spanish Stopwords, strip from the dataset????
+# Spanish Stopwords, strip from the dataset
 # Not suitable for this use case since we are removing entries from the dev.in and dev.out
 # https://github.com/stopwords-iso/stopwords-es
 # https://www.ranks.nl/stopwords/spanish
-# Use a different algorithm, perhaps Naive Bayes Algorithm
 
 # Remove Stopwords
 def smooth_labels_transmission(transmission_parameters,alpha_sm=0.01):
@@ -116,19 +117,16 @@ def smooth_labels_emission(emission_dict,alpha_sm=0.01):
 
 
 
-def run_viterbi(training_path, test_path, output_path,alpha_sm=0.0):
-    train = utilities.read_data(training_path)
+def run_viterbi(training_path, test_path, output_path,mode,alpha_sm=0.0): #mode ES or RU
+    if mode =="ES":
+        stopwords_a = read_stopwords(STOP_words_ES_file_path)
+    elif mode =="RU":
+        stopwords_a = read_stopwords(STOP_words_RU_file_path)
+    train = remove_stopwords(training_path,stopwords_a)
     train_words = utilities.get_training_set_words(train)
     test = utilities.read_dev(test_path)
     tags = utilities.count_tags(train)
     tag_words = utilities.count_tag_words(train)
-    """
-    transmission_counts = part2.count_transmissions(train)
-    t_params = part2.estimate_transmission_parameters(transmission_counts, tags)
-    t_params = smooth_labels_transmission(t_params,alpha_sm=alpha_sm)
-    e_params = part1.estimate_emission_parameters_with_unk(tags, tag_words)
-    e_params = smooth_labels_emission(e_params,alpha_sm=alpha_sm)
-    """
     
     transmission_counts = part2.count_transmissions(train)
     t_params = part2.estimate_transmission_parameters(transmission_counts, tags)
@@ -138,8 +136,8 @@ def run_viterbi(training_path, test_path, output_path,alpha_sm=0.0):
     prediction = part2.viterbi_loop(test, t_params, e_params, train_words)
     utilities.output_prediction(prediction, test, output_path)
 
-def run_everything(training_path, test_path, output_path):
-    run_viterbi(training_path,test_path,output_path)
+def run_everything(training_path, test_path, output_path, mode):
+    run_viterbi(training_path,test_path,output_path,mode)
     
 
 
@@ -156,11 +154,11 @@ if __name__ == "__main__":
 
     if n == 1:
         #RU
-        run_everything(RU_train,RU_test_dev,RU_test_dev_write)
-        run_everything(RU_train,RU_test,RU_test_write)
+        run_everything(RU_train,RU_test_dev,RU_test_dev_write,"RU")
+        run_everything(RU_train,RU_test,RU_test_write,"RU")
         #ES
-        run_everything(ES_train,ES_test_dev,ES_test_dev_write)
-        run_everything(ES_train,ES_test,ES_test_write)
+        run_everything(ES_train,ES_test_dev,ES_test_dev_write, "ES")
+        run_everything(ES_train,ES_test,ES_test_write,"ES")
     else:
         if n == 4:
             run_everything(sys.argv[1], sys.argv[2], sys.argv[3])
@@ -168,7 +166,6 @@ if __name__ == "__main__":
             print("usage: python part4.py [train_path] [test_path] [output_path]")
     
     #evaluation portion
-        #evaluation portion
     print('The scores for the russian dataset is:')
     os.system('python3 EvalScript/evalResult.py RU/dev.out RU/dev.p4.out')
     print('The scores for the ES dataset is:')
