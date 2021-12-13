@@ -27,9 +27,14 @@ RU_test_write = read_universal_('test.p4.out','RU')
 ES_test_write = read_universal_('test.p4.out','ES')
 
 step = 0.1
+
+python_cmd = "python3"
+if os.name != "posix":
+    python_cmd = "python"
+
 for i in np.arange(0,1.0,step):
     print(f"The value of alpha is {i}")
 
-    os.system(f'python3 part4.py {i}')
+    os.system(f'{python_cmd} part4.py {i}')
     
     
