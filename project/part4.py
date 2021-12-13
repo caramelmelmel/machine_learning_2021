@@ -119,21 +119,14 @@ def smooth_labels_emission(emission_dict,alpha_sm=0.01):
 
 def run_viterbi(training_path, test_path, output_path,mode,alpha_sm=0.0): #mode ES or RU
     if mode =="ES":
-        stopwords_a = read_stopwords(r'ES\stopwords_ES.txt')
+        stopwords_a = read_stopwords(STOP_words_ES_file_path)
     elif mode =="RU":
-        stopwords_a = read_stopwords(r'RU\stopwords_RU.txt')
+        stopwords_a = read_stopwords(STOP_words_RU_file_path)
     train = remove_stopwords(training_path,stopwords_a)
     train_words = utilities.get_training_set_words(train)
     test = utilities.read_dev(test_path)
     tags = utilities.count_tags(train)
     tag_words = utilities.count_tag_words(train)
-    """
-    transmission_counts = part2.count_transmissions(train)
-    t_params = part2.estimate_transmission_parameters(transmission_counts, tags)
-    t_params = smooth_labels_transmission(t_params,alpha_sm=alpha_sm)
-    e_params = part1.estimate_emission_parameters_with_unk(tags, tag_words)
-    e_params = smooth_labels_emission(e_params,alpha_sm=alpha_sm)
-    """
     
     transmission_counts = part2.count_transmissions(train)
     t_params = part2.estimate_transmission_parameters(transmission_counts, tags)
