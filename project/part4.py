@@ -83,10 +83,6 @@ def get_symbols(edataset): #to get all of the symbols
 
 # Russian Stopwords
 # Remove symbols as well, using the stopwords method
-# Spanish Stopwords, strip from the dataset
-# Not suitable for this use case since we are removing entries from the dev.in and dev.out
-# https://github.com/stopwords-iso/stopwords-es
-# https://www.ranks.nl/stopwords/spanish
 
 # Remove Stopwords
 def smooth_labels_transmission(transmission_parameters,alpha_sm=0.01):
@@ -136,8 +132,8 @@ def run_viterbi(training_path, test_path, output_path,mode,alpha_sm=0.0): #mode 
     prediction = part2.viterbi_loop(test, t_params, e_params, train_words)
     utilities.output_prediction(prediction, test, output_path)
 
-def run_everything(training_path, test_path, output_path, mode):
-    run_viterbi(training_path,test_path,output_path,mode)
+def run_everything(training_path, test_path, output_path, mode,alpha_sm=0.1):
+    run_viterbi(training_path,test_path,output_path,mode,alpha_sm=alpha_sm)
     
 
 
@@ -162,6 +158,14 @@ if __name__ == "__main__":
     else:
         if n == 4:
             run_everything(sys.argv[1], sys.argv[2], sys.argv[3])
+        elif n == 2:
+            factor = float(sys.argv[1])
+            #RU
+            run_everything(RU_train,RU_test_dev,RU_test_dev_write,"RU",alpha_sm=factor)
+            run_everything(RU_train,RU_test,RU_test_write,"RU",alpha_sm=factor)
+            #ES
+            run_everything(ES_train,ES_test_dev,ES_test_dev_write, "ES", alpha_sm=factor)
+            run_everything(ES_train,ES_test,ES_test_write,"ES",alpha_sm=factor)
         else:
             print("usage: python part4.py [train_path] [test_path] [output_path]")
     
