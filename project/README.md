@@ -58,6 +58,10 @@ For the Spanish dataset:<br/>
 c. Playing around with what we do for part 4.
 This script runs the range of values of our factor from 0.0 to 1.0.
 
+Note: The difference between `part4.py` and `part4_script.py` is that the former runs on the defaltu alpha values and that of specificied needed files while the latter runs with how our factor is determined for the smoothening of the label. 
+
+`part4.py` is needed for `part4_script.py` to run.
+
 For <b>MacOS/Linux:</b>
 
 ```python3 part4_script.py```
